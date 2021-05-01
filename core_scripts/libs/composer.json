@@ -1,0 +1,6 @@
+{
+    "require": {
+        "imangazaliev/didom": "^1.16",
+        "rosell-dk/webp-convert": "^2.4"
+    }
+}

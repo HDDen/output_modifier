@@ -1,0 +1,5 @@
+body .lazyload:not(img),
+body .lazyload:not(img)::before,
+body .lazyload:not(img)::after{
+	background-image: none!important;
+}

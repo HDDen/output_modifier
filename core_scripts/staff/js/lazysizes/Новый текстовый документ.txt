@@ -1,0 +1,56 @@
+<script src="lazysizes.min.js" async=""></script>
+class="lazyload"
+
+
+
+modern transparent srcset pattern
+Combine a normal src attribute with a transparent or low quality image as srcset value and a data-srcset attribute. This way modern browsers will lazy load without loading the src attribute and all others will simply fallback to the initial src attribute (without lazyload). (This nice pattern originated from @ivopetkov.)
+
+<img
+    src="image3.jpg"
+    srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+	data-srcset="image3.jpg 600w,
+		image1.jpg 220w,
+	    image2.jpg 300w,
+	    image4.jpg 900w"
+	data-sizes="auto"
+	class="lazyload" />
+
+
+***************
+
+ls.unveilhooks.min.js - дополнение для загрузки фоновых имаг
+
+<!-- Background image example: -->
+<div class="lazyload" data-bg="bg-img.jpg">
+	<!-- content -->
+</div>
+
+https://github.com/aFarkas/lazysizes/tree/e305d28d4b6c4ff9f12dd4d438d5d7c5d41574db/plugins/unveilhooks
+
+
+
+
+<!-- Scripts/Widgets example: -->
+<div class="lazyload" data-script="module-name.js">
+
+</div>
+
+<!-- Styles -->
+<div class="lazyload" data-link="my-style.css">
+
+</div>
+
+<!-- Video example: -->
+<video class="lazyload" data-poster="poster.jpg" preload="none">
+ 	<!-- sources -->
+</video>
+
+<!-- require.js * example -->
+<div class="lazyload" data-require="module-name"></div>
+
+
+<!-- Styles & script combined -->
+<div class="lazyload" data-script="my-script.js" data-link="my-style.css">
+
+</div>
