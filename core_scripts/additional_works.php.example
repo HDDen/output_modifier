@@ -168,7 +168,7 @@ if ($outputmod_forcelibs && defined('OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION') && 
         $outputmod__libs[] = new Element('script', null, array(
             'id' => 'unwebp',
             'src' => '/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/staff/js/unwebp.min.js',
-            'async' => 'async',
+            'defer' => 'defer',
 			'data-skip-moving' => 'true'
         ));
     }
