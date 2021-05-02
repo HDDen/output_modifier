@@ -650,6 +650,18 @@ function process_webp($document, &$params = false){
 		define('WEBP_WPC_URL', $params['webp']['wpc']['url']);
 	}
 
+	// добавим атрибут в разметку для определения префикса папки webp
+	// без этого unwebp.js будет убирать только расширение
+	if ($params['webp']['store_converted_in']){
+		// ищем body
+		$unwebpmarker = $document->first('body');
+		if (!$unwebpmarker){
+			$unwebpmarker = $document->first('div');
+		}
+		$unwebpmarker->setAttribute('data-webpprefix', '/'.trim($params['webp']['store_converted_in'], '/'));
+		unset($unwebpmarker);
+	}
+
 	// начинаем обработку
 	foreach ($process_on as $elem){
 
