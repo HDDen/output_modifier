@@ -1,408 +1,524 @@
 <?php
-
-// фиксим отсутствующий name у input
-$inputs = $document->find('input');
-if (count($inputs) > 0){
-	foreach ($inputs as $input) {
-		// если атрибут пуст или отсутствует
-		if ( ($input->hasAttribute('name') && ($input->getAttribute('name') == '')) || !($input->hasAttribute('name')) ){
-			if ($input->hasAttribute('id')){
-				$newname = $input->getAttribute('id');
-				$input->setAttribute('name', $newname);
-			}
-		}
-
-		// и удаляем x-autocompletetype
-		if ($input->hasAttribute('x-autocompletetype')){
-			$input->removeAttribute('x-autocompletetype');
-		}
-	}
-}
-unset($inputs);
-
-// фиксим label for
-$labels = $document->find('label');
-if (count($labels)){
-	foreach ($labels as $label) {
-		if ($label->hasAttribute('for')){
-			$id = $label->getAttribute('for');
-			$elem = $document->first('#'.$id);
-			if (!is_null($elem) && ($elem->tag == 'div')){
-				$label->removeAttribute('for');
-			}
-		}
-	}
-}
-unset($labels);
-
-// удаляем name=forma
-$form_markers = $document->find('a#forma[name="forma"]');
-if (count($form_markers)){
-	foreach ($form_markers as $marker) {
-		$marker->removeAttribute('name');
-	}
-}
-unset($form_markers);
-
-// фиксим дублирование id блока телефона
-$phoneblock = $document->find('#block-block-1');
-if (count($phoneblock) > 1){
-	unset($phoneblock[0]);
-	foreach ($phoneblock as $bl_index => $block) {
-		$block->setAttribute('id', 'block-block-1-'.$bl_index);
-	}
-}
-unset($phoneblock);
-
-// фиксим дублирование блока капчи
-$capchablock = $document->find('#captcha_response');
-if (count($capchablock > 1)){
-	unset($capchablock[0]);
-	foreach ($capchablock as $bl_index => $block) {
-		$block->setAttribute('id', 'captcha_response-'.$bl_index);
-	}
-}
-unset($capchablock);
-
-$capchainput = $document->find('#edit-captcha-response');
-if (count($capchainput) > 1){
-	unset($capchainput[0]);
-	foreach ($capchainput as $bl_index => $block) {
-		$block->setAttribute('id', 'edit-captcha-response-'.$bl_index);
-	}
-}
-unset($capchainput);
-
-// удалим устаревшие атрибуты из table, заменив их на класс
-$tables = $document->find('table');
-if (count($tables)){
-	foreach ($tables as $table) {
-		$addClass = false;
-		if ($table->hasAttribute('border')){$table->removeAttribute('border'); $addClass = true;}
-		if ($table->hasAttribute('cellpadding')){$table->removeAttribute('cellpadding'); $addClass = true;}
-		if ($table->hasAttribute('cellspacing')){$table->removeAttribute('cellspacing'); $addClass = true;}
-
-		// add class
-		if ($addClass){
-			$tableClass='';
-			if ($table->hasAttribute('class')){
-				$tableClass = $table->getAttribute('class').' ';
-			}
-			$table->setAttribute('class', $tableClass.'inlineTable');
-		}
-	}
-}
-unset($tables);
-
-// удалим устаревшие атрибуты из iframe
-$iframes = $document->find('iframe[frameborder]');
-if (count($iframes)){
-	foreach ($iframes as $iframe) {
-		$iframe->removeAttribute('frameborder');
-	}
-}
-unset($iframes);
-
-// внешние и некоторые внутренние ссылки в nofollow
-$nofollow_links = array(
-	'a[href="/o-nas/"]',
-	'a[href="/programma-lecheniya-i-reabilitacii/"]',
-	'a[href="/reabilitacionnyy-centr/"]',
-	'a[href="/rasporyadok-dnya/"]',
-	'a[href="/vopros-otvet/"]',
-	'a[href="/news/"]',
-	'a[href="/soglashenie-ob-obrabotke-i-ispolzovanii-personalnyh-dannyh/"]',
-	'a[href*="https://www.youtube.com"]',
-	'a[href*="https://youtu.be"]',
-);
-foreach ($nofollow_links as $value) {
-	$link = $document->find($value);
-	if (count($link)){
-		foreach ($link as $target) {
-			$target->setAttribute('rel', 'nofollow');
-		}
-	}
-}
-unset($nofollow_links);
-
-// добавляем класс к первому слайду первого экрана
-if ($_SERVER['REQUEST_URI'] == '/'){
-    $active_slide = $document->first('#block-views-slider-main .item-list li:first-child');
-    if ($active_slide){
-        $existing_class = $active_slide->getAttribute('class');
-        if ($existing_class){
-            $existing_class .= ' active';
-        } else {
-            $existing_class = 'active';
-        }
-        $active_slide->setAttribute('class', $existing_class);
-    }
-}
-
-// Подключение js/css. Можем исходить от параметров, т.к. доступен массив $params
-// 1 - lozad, 2 - unwebp, 3 - webp-on-off, 4 - avif-on-off, 5 - img-width-height-helper, 6 - css-lazyload-helper.css
-$outputmod_forcelibs = true;
-// проверка установленного пути
-if ($outputmod_forcelibs && defined('OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION') && defined('WEBPPROJECT')){
-    // массив js
-    $outputmod__libs = array();
-    
-    // avif-on-off
-    if (file_exists(WEBPPROJECT.'/staff/js/avif-on-off-class.min.js')){
-        $outputmod__libs[] = new Element('script', file_get_contents(WEBPPROJECT.'/staff/js/avif-on-off-class.min.js'), array(
-            'id' => 'avif-on-off',
-			'data-skip-moving' => 'true'
-        ));
-    }
-
-    // webp-on-off
-    if (file_exists(WEBPPROJECT.'/staff/js/webp-on-off-class.min.js')){
-        $outputmod__libs[] = new Element('script', file_get_contents(WEBPPROJECT.'/staff/js/webp-on-off-class.min.js'), array(
-            'id' => 'webp-on-off',
-			'data-skip-moving' => 'true'
-        ));
-    }
-
-    // unwebp
-    if ( $params['webp']['img'] && ($params['webp']['force'] || ($params['webp']['img_webpstore_attr'] == 'src') ) && file_exists(WEBPPROJECT.'/staff/js/unwebp.min.js')){
-        $outputmod__libs[] = new Element('script', null, array(
-            'id' => 'unwebp',
-            'src' => '/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/staff/js/unwebp.min.js',
-            'defer' => 'defer',
-			'data-skip-moving' => 'true'
-        ));
-    }
-
-    // lozad
-    // проверить наличие селектора с lazy
-    $outputmod__usejslazylib = false;
-    foreach ($params['lazyload'] as $selector => $data){
-        if (isset($data['lazy']) && $data['lazy']){
-            $outputmod__usejslazylib = true;
-            break;
-        }
-    }
-    if ($outputmod__usejslazylib){
-        $outputmod__libs[] = new Element('script', null, array(
-            'id' => 'lozad',
-            'src' => '/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/staff/js/lozad/lozad.min.js',
-            'async' => 'async',
-			'data-skip-moving' => 'true'
-        ));
-    }
-
-    // массив css - делаем один стиль
-    $outmod__css = '';
-    // img-width-height-helper.css
-    if ($params['img_setsize'] && file_exists(WEBPPROJECT.'/staff/css/img-width-height-helper.css')){
-        $outmod__css .= '/* img-width-height-helper.css */'.PHP_EOL.file_get_contents(WEBPPROJECT.'/staff/css/img-width-height-helper.css').PHP_EOL;
-    }
-    // css-lazyload-helper.css
-    if ($outputmod__usejslazylib && file_exists(WEBPPROJECT.'/staff/css/css-lazyload-helper.css')){
-        $outmod__css .= '/* css-lazyload-helper.css */'.PHP_EOL.file_get_contents(WEBPPROJECT.'/staff/css/css-lazyload-helper.css').PHP_EOL;
-    }
-
-    // подключаем библиотеки
-    if (count($outputmod__libs)){
-        $outputmod__libs__cnt = $document->first('head');
-        if ($outputmod__libs__cnt){
-            $outputmod__libs__cnt->prependChild($outputmod__libs);
-            // отдельное подключение css - в конец
-            if ($outmod__css){
-                $outmod__css_elem = new Element('style', $outmod__css);
-                $outputmod__libs__cnt->appendChild($outmod__css_elem);
-            }
-        }
-    }
-}
-
-// canonical hardfix
-$didom__canonicals = $document->find('link[rel="canonical"]');
-// если существует
-if (count($didom__canonicals) > 0){
-    foreach ($didom__canonicals as $didom__canonical){
-        // модифицируем оригинал, отбросив get-параметры
-        $didom__canonical__cnt = $didom__canonical->getAttribute('href');
-        if ($didom__canonical__cnt){
-            $didom__canonical__cnt = strtok($didom__canonical__cnt, '?');
-            $didom__canonical->setAttribute('href', $didom__canonical__cnt);
-        }
-    }
-} else {
-    // если нет, нужно создать
-    $didom__canonical__cnt = $document->first('head');
-    if ($didom__canonical__cnt){
-        $didom__canonical = new Element('link', null, array('rel' => 'canonical', 'href' => strtolower(strtok('https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], '?'))));
-        $didom__canonical__cnt->appendChild($didom__canonical);
-    }
-}
-
-/**
- * Добавляем микроразметку
- */
-
+use DiDom\Document;
 use DiDom\Element;
 
-$schema_domain = 'https://'.trim($_SERVER['HTTP_HOST'], '/');
-$schema_sitename = 'Стоматология Максима Шубных';
-$schema_trail = ''; // '' или '/'. Добавлять ли закрывающий слэш к url
+function didom_hardcoded_ops(&$document, &$params){
+	// фиксим отсутствующий name у input
+	$inputs = $document->find('input');
+	if (count($inputs) > 0){
+		foreach ($inputs as $input) {
+			// если атрибут пуст или отсутствует
+			if ( ($input->hasAttribute('name') && ($input->getAttribute('name') == '')) || !($input->hasAttribute('name')) ){
+				if ($input->hasAttribute('id')){
+					$newname = $input->getAttribute('id');
+					$input->setAttribute('name', $newname);
+				}
+			}
 
-$schema_allResultEntities = array(); // будет содержать каждый добавленный элемент Схемы
+			// и удаляем x-autocompletetype
+			if ($input->hasAttribute('x-autocompletetype')){
+				$input->removeAttribute('x-autocompletetype');
+			}
+		}
+	}
+	unset($inputs);
 
-// Секция для разметки WebPage
-$schema_pageurl = $schema_domain.$_SERVER['REQUEST_URI'];
-$schema_logotype = $schema_domain.'/sites/all/themes/flumb/logo.png'; // any size, but recommends 600 * 316
-$schema_logotype_width = '182';
-$schema_logotype_height = '92';
-$schema_pagename = $document->find('h1');
-if (count($schema_pagename)){
-	$schema_tempor = trim($schema_pagename[0]->text());
-	$schema_pagename = $schema_tempor;
-} else {
-	$schema_pagename = $schema_sitename;
-}
-// Разметка WebPage
-$schema_allResultEntities[] = '{
-	"@type": "WebPage",
-	"@id": "'.$schema_pageurl.'",
-	"name": "'.$schema_pagename.'",
-	"description": "",
-	"author": {
-		"@type": "Organization",
+	// фиксим label for
+	$labels = $document->find('label');
+	if (count($labels)){
+		foreach ($labels as $label) {
+			if ($label->hasAttribute('for')){
+				$id = $label->getAttribute('for');
+				$elem = $document->first('#'.$id);
+				if (!is_null($elem) && ($elem->tag == 'div')){
+					$label->removeAttribute('for');
+				}
+			}
+		}
+	}
+	unset($labels);
+
+	// удаляем name=forma
+	$form_markers = $document->find('a#forma[name="forma"]');
+	if (count($form_markers)){
+		foreach ($form_markers as $marker) {
+			$marker->removeAttribute('name');
+		}
+	}
+	unset($form_markers);
+
+	// фиксим дублирование id блока телефона
+	$phoneblock = $document->find('#block-block-1');
+	if (count($phoneblock) > 1){
+		unset($phoneblock[0]);
+		foreach ($phoneblock as $bl_index => $block) {
+			$block->setAttribute('id', 'block-block-1-'.$bl_index);
+		}
+	}
+	unset($phoneblock);
+
+	// фиксим дублирование блока капчи
+	$capchablock = $document->find('#captcha_response');
+	if (count($capchablock > 1)){
+		unset($capchablock[0]);
+		foreach ($capchablock as $bl_index => $block) {
+			$block->setAttribute('id', 'captcha_response-'.$bl_index);
+		}
+	}
+	unset($capchablock);
+
+	$capchainput = $document->find('#edit-captcha-response');
+	if (count($capchainput) > 1){
+		unset($capchainput[0]);
+		foreach ($capchainput as $bl_index => $block) {
+			$block->setAttribute('id', 'edit-captcha-response-'.$bl_index);
+		}
+	}
+	unset($capchainput);
+
+	// удалим устаревшие атрибуты из table, заменив их на класс
+	$tables = $document->find('table');
+	if (count($tables)){
+		foreach ($tables as $table) {
+			$addClass = false;
+			if ($table->hasAttribute('border')){$table->removeAttribute('border'); $addClass = true;}
+			if ($table->hasAttribute('cellpadding')){$table->removeAttribute('cellpadding'); $addClass = true;}
+			if ($table->hasAttribute('cellspacing')){$table->removeAttribute('cellspacing'); $addClass = true;}
+
+			// add class
+			if ($addClass){
+				$tableClass='';
+				if ($table->hasAttribute('class')){
+					$tableClass = $table->getAttribute('class').' ';
+				}
+				$table->setAttribute('class', $tableClass.'inlineTable');
+			}
+		}
+	}
+	unset($tables);
+
+	// удалим устаревшие атрибуты из iframe
+	$iframes = $document->find('iframe[frameborder]');
+	if (count($iframes)){
+		foreach ($iframes as $iframe) {
+			$iframe->removeAttribute('frameborder');
+		}
+	}
+	unset($iframes);
+
+	// внешние и некоторые внутренние ссылки в nofollow
+	$nofollow_links = array(
+		'a[href="/o-nas/"]',
+		'a[href="/programma-lecheniya-i-reabilitacii/"]',
+		'a[href="/reabilitacionnyy-centr/"]',
+		'a[href="/rasporyadok-dnya/"]',
+		'a[href="/vopros-otvet/"]',
+		'a[href="/news/"]',
+		'a[href="/soglashenie-ob-obrabotke-i-ispolzovanii-personalnyh-dannyh/"]',
+		'a[href*="https://www.youtube.com"]',
+		'a[href*="https://youtu.be"]',
+	);
+	foreach ($nofollow_links as $value) {
+		$link = $document->find($value);
+		if (count($link)){
+			foreach ($link as $target) {
+				$target->setAttribute('rel', 'nofollow');
+			}
+		}
+	}
+	unset($nofollow_links);
+
+	// добавляем класс к первому слайду первого экрана
+	if ($_SERVER['REQUEST_URI'] == '/'){
+		$active_slide = $document->first('#block-views-slider-main .item-list li:first-child');
+		if ($active_slide){
+			$existing_class = $active_slide->getAttribute('class');
+			if ($existing_class){
+				$existing_class .= ' active';
+			} else {
+				$existing_class = 'active';
+			}
+			$active_slide->setAttribute('class', $existing_class);
+		}
+	}
+
+	/**
+	 * Injecting our js/css. Can calculate needing by options from $params array
+	 */
+	// 1 - avif-on-off, 2 - webp-on-off, 3 - lozad, 4 - unwebp, 5 - img-width-height-helper, 6 - css-lazyload-helper.css
+	$outputmod_forcelibs = false;
+	// проверка установленного пути
+	if ($outputmod_forcelibs && defined('OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION') && defined('WEBPPROJECT')){
+		// массив js
+		$outputmod__libs = array();
+		
+		// avif-on-off
+		if (file_exists(WEBPPROJECT.'/staff/js/avif-on-off-class.min.js')){
+			$outputmod__libs[] = new Element('script', file_get_contents(WEBPPROJECT.'/staff/js/avif-on-off-class.min.js'), array(
+				'id' => 'avif-on-off',
+				'data-skip-moving' => 'true'
+			));
+		}
+
+		// webp-on-off
+		if (file_exists(WEBPPROJECT.'/staff/js/webp-on-off-class.min.js')){
+			$outputmod__libs[] = new Element('script', file_get_contents(WEBPPROJECT.'/staff/js/webp-on-off-class.min.js'), array(
+				'id' => 'webp-on-off',
+				'data-skip-moving' => 'true'
+			));
+		}
+
+		// lozad
+		// проверить наличие селектора с lazy
+		$outputmod__usejslazylib = false;
+		foreach ($params['lazyload'] as $selector => $data){
+			if (isset($data['lazy']) && $data['lazy']){
+				$outputmod__usejslazylib = true;
+				break;
+			}
+		}
+		if ($outputmod__usejslazylib){
+			$outputmod__libs[] = new Element('script', null, array(
+				'id' => 'lozad',
+				'src' => '/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/staff/js/lozad/lozad.min.js',
+				'async' => 'async',
+				'data-skip-moving' => 'true'
+			));
+		}
+
+		// unwebp
+		if ( $params['webp']['img'] && ($params['webp']['force'] || ($params['webp']['img_webpstore_attr'] == 'src') ) && file_exists(WEBPPROJECT.'/staff/js/unwebp.min.js')){
+			$outputmod__libs[] = new Element('script', null, array(
+				'id' => 'unwebp',
+				'src' => '/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/staff/js/unwebp.min.js',
+				'defer' => 'defer',
+				'data-skip-moving' => 'true'
+			));
+		}
+
+		// массив css - делаем один стиль
+		$outmod__css = '';
+		// img-width-height-helper.css
+		if ($params['img_setsize'] && file_exists(WEBPPROJECT.'/staff/css/img-width-height-helper.css')){
+			$outmod__css .= '/* img-width-height-helper.css */'.PHP_EOL.file_get_contents(WEBPPROJECT.'/staff/css/img-width-height-helper.css').PHP_EOL;
+		}
+		// css-lazyload-helper.css
+		if ($outputmod__usejslazylib && file_exists(WEBPPROJECT.'/staff/css/css-lazyload-helper.css')){
+			$outmod__css .= '/* css-lazyload-helper.css */'.PHP_EOL.file_get_contents(WEBPPROJECT.'/staff/css/css-lazyload-helper.css').PHP_EOL;
+		}
+
+		// подключаем библиотеки
+		if (count($outputmod__libs)){
+			$outputmod__libs__cnt = $document->first('head');
+			if ($outputmod__libs__cnt){
+				$outputmod__libs__cnt->prependChild($outputmod__libs);
+				// отдельное подключение css - в конец
+				if ($outmod__css){
+					$outmod__css_elem = new Element('style', $outmod__css);
+					$outputmod__libs__cnt->appendChild($outmod__css_elem);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Добавление предзагрузки с проверкой на куки
+	 */
+
+	$didompreload_mode = "link"; // false - отключает, "headers" - добавляет в http-заголовок, "link" - создаём <link rel="preload">
+	$do_css_nonblocking = false; // false/true/"whitelist"/"blacklist" доп. опция - делаем css неблокируемым (по мотивам https://www.methodlab.ru/articles/preload_speedup)
+	$do_css_nonblocking_arr = array(); // filter - array of hrefs, depends on $do_css_nonblocking-mode
+
+	// проверка куки. Если уже установлена - не делаем ничего
+	if ($didompreload_mode){
+
+		// нужно проверить, сможем ли мы встроить наш результат вычислений. Для этого должен быть доступен head-элемент, либо режим "headers"
+		$didom_preload__cnt = $document->first('head');
+		if ($didom_preload__cnt || ( ($didompreload_mode == "headers") && !isset($_COOKIE['res_pushed']) ) ){
+
+			// делаем выборку, а механизм встраивания определяется режимом
+			$didom_preloadHeaderContent = '';
+
+			// выборка
+			$didom_preloadjs = $document->find('script[src]');
+			$didom_preloadcss = $document->find('link[rel="stylesheet"]');
+			
+			// здесь будем хранить сформированные элементы
+			// также устанавливаем переменную $didom_preload_checkedLinksMode, чтобы гарантированно и быстро определять тип добавления
+			if ( ($didompreload_mode == "headers") && !isset($_COOKIE['res_pushed'])){
+				$didom_preload_checkedLinksMode = false;
+				$didom_preload = '';
+			} else {
+				$didom_preload_checkedLinksMode = true;
+				$didom_preload = array();
+			}
+
+			// обработка js
+			if (!empty($didom_preloadjs)){
+				foreach ($didom_preloadjs as $index => $js) {
+					if ($didom_preload_checkedLinksMode) {
+						$didom_preload[] = new Element('link', null, array(
+							'rel' => 'preload',
+							'as' => 'script',
+							'href' => $js->getAttribute('src'),
+						));
+					} else {
+						if ($didom_preload){
+							$didom_preload .= ','; // add comma for splitting rules
+						}
+						$didom_preload .= '<'.$js->getAttribute('src').'>;rel=preload;as=script';
+					}
+				}
+			}
+
+			// обработка css
+			if (!empty($didom_preloadcss)){
+				foreach ($didom_preloadcss as $index => $css) {
+					$css_href = $css->getAttribute('href'); // store href
+
+					if ($didom_preload_checkedLinksMode) {
+						$didom_preload[] = new Element('link', null, array(
+							'rel' => 'preload',
+							'as' => 'style',
+							'href' => $css_href,
+						));
+					} else {
+						if ($didom_preload){
+							$didom_preload .= ','; // add comma for splitting rules
+						}
+						$didom_preload .= '<'.$css_href.'>;rel=preload;as=script';
+					}
+
+					// имплементация неблокируемого подключения
+					if ($do_css_nonblocking){
+					
+						// если указан режим фильтра и он настроен, делаем проверки. Иначе - просто обработка 
+						if (($do_css_nonblocking !== true) && !empty($do_css_nonblocking_arr)) {
+							foreach ($do_css_nonblocking_arr as $href_filter) {
+								if (mb_stripos($css_href, $href_filter) !== false){
+									// элемент попал под фильтр. Но под какой?
+									if ($do_css_nonblocking == "blacklist"){
+										continue;
+									} else if ($do_css_nonblocking == "whitelist"){
+										$css->setAttribute('rel', 'preload');
+										$css->setAttribute('as', 'style');
+										$css->setAttribute('onload', 'this.rel="stylesheet"');
+									}
+								}
+							}
+						} else {
+							$css->setAttribute('rel', 'preload');
+							$css->setAttribute('as', 'style');
+							$css->setAttribute('onload', 'this.rel="stylesheet"');
+						}
+					}
+				}
+			}
+
+			unset($didom_preloadjs);
+			unset($didom_preloadcss);
+
+			// встраивание
+			if ($didom_preload_checkedLinksMode && !empty($didom_preload)){
+				if ($didom_preload__cnt){
+					$didom_preload__cnt->prependChild($didom_preload);
+				}
+			} else if ($didom_preload != ''){
+				header("Link: ".$didom_preload, false);
+				setcookie("res_pushed", 'true', time()+259200, '/');
+			}
+
+		}
+	}
+
+	/**
+	 * canonical hardfix
+	 */
+	$didom__canonicals = $document->find('link[rel="canonical"]');
+	// если существует
+	if (count($didom__canonicals) > 0){
+		foreach ($didom__canonicals as $didom__canonical){
+			// модифицируем оригинал, отбросив get-параметры
+			$didom__canonical__cnt = $didom__canonical->getAttribute('href');
+			if ($didom__canonical__cnt){
+				$didom__canonical__cnt = strtok($didom__canonical__cnt, '?');
+				$didom__canonical->setAttribute('href', $didom__canonical__cnt);
+			}
+		}
+	} else {
+		// если нет, нужно создать
+		$didom__canonical__cnt = $document->first('head');
+		if ($didom__canonical__cnt){
+			$didom__canonical = new Element('link', null, array('rel' => 'canonical', 'href' => strtolower(strtok('https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], '?'))));
+			$didom__canonical__cnt->appendChild($didom__canonical);
+		}
+	}
+
+	/**
+	 * Добавляем микроразметку
+	 */
+
+	$schema_domain = 'https://'.trim($_SERVER['HTTP_HOST'], '/');
+	$schema_sitename = 'Стоматология Максима Шубных';
+	$schema_trail = ''; // '' или '/'. Добавлять ли закрывающий слэш к url
+
+	$schema_allResultEntities = array(); // будет содержать каждый добавленный элемент Схемы
+
+	// Секция для разметки WebPage
+	$schema_pageurl = $schema_domain.$_SERVER['REQUEST_URI'];
+	$schema_logotype = $schema_domain.'/sites/all/themes/flumb/logo.png'; // any size, but recommends 600 * 316
+	$schema_logotype_width = '182';
+	$schema_logotype_height = '92';
+	$schema_pagename = $document->find('h1');
+	if (count($schema_pagename)){
+		$schema_tempor = trim($schema_pagename[0]->text());
+		$schema_pagename = $schema_tempor;
+	} else {
+		$schema_pagename = $schema_sitename;
+	}
+	// Разметка WebPage
+	$schema_allResultEntities[] = '{
+		"@type": "WebPage",
+		"@id": "'.$schema_pageurl.'",
+		"name": "'.$schema_pagename.'",
+		"description": "",
+		"author": {
+			"@type": "Organization",
+			"@id": "'.$schema_domain.'",
+			"name": "'.$schema_sitename.'",
+			"url": "'.$schema_domain.'",
+			"logo": {
+				"@type": "ImageObject",
+				"contentUrl": "'.$schema_logotype.'",
+				"url": "'.$schema_logotype.'",
+				"width": "'.$schema_logotype_width.'",
+				"height": "'.$schema_logotype_height.'"
+			}
+		},
+		"url": "'.$schema_pageurl.'",
+		"inLanguage": "ru_RU"
+	},
+	{
+		"@type": "WebSite",
 		"@id": "'.$schema_domain.'",
 		"name": "'.$schema_sitename.'",
 		"url": "'.$schema_domain.'",
-		"logo": {
-			"@type": "ImageObject",
-			"contentUrl": "'.$schema_logotype.'",
-			"url": "'.$schema_logotype.'",
-			"width": "'.$schema_logotype_width.'",
-			"height": "'.$schema_logotype_height.'"
-		}
-	},
-	"url": "'.$schema_pageurl.'",
-	"inLanguage": "ru_RU"
-},
-{
-	"@type": "WebSite",
-	"@id": "'.$schema_domain.'",
-	"name": "'.$schema_sitename.'",
-	"url": "'.$schema_domain.'",
-	"inLanguage": "ru_RU"
-}';
+		"inLanguage": "ru_RU"
+	}';
 
-/**
- *  Секция для разметки Breadcrumbs
- *	Нужно получить всех детей контейнера, и в каждом сначала искать A, а если его нет - брать сам элемент (fallback)
- *	При обработке фоллбэка нужно проверять текстовое значение узла. Если не [a-zA-Zа-яА-Я] - это простой разделитель, не добавлять его
-*/
+	/**
+	 *  Секция для разметки Breadcrumbs
+	 *	Нужно получить всех детей контейнера, и в каждом сначала искать A, а если его нет - брать сам элемент (fallback)
+	*	При обработке фоллбэка нужно проверять текстовое значение узла. Если не [a-zA-Zа-яА-Я] - это простой разделитель, не добавлять его
+	*/
 
-$schema_breadcrumbsSelector = '.breadcrumbs .breadcrumb'; // контейнер, в котором будем искать крошки
+	$schema_breadcrumbsSelector = '.breadcrumbs .breadcrumb'; // контейнер, в котором будем искать крошки
 
-$schema_crumbs_resultItems = array(); // ['link' => 'name'; 'link2' => 'name'; ...]
-$schema_crumbs_container = $document->first($schema_breadcrumbsSelector);
-if (!is_null($schema_crumbs_container)){
-	$schema_crumbs = $schema_crumbs_container->children(); // собираем прямых потомков
-	if (count($schema_crumbs)){
-		foreach ($schema_crumbs as $index => $schema_crumb) { // работаем с каждым элементом крошек
-			$crumb_element = $schema_crumb->first('a'); // сначала ищем A
-			
-			if (!is_null($crumb_element)){
+	$schema_crumbs_resultItems = array(); // ['link' => 'name'; 'link2' => 'name'; ...]
+	$schema_crumbs_container = $document->first($schema_breadcrumbsSelector);
+	if (!is_null($schema_crumbs_container)){
+		$schema_crumbs = $schema_crumbs_container->children(); // собираем прямых потомков
+		if (count($schema_crumbs)){
+			foreach ($schema_crumbs as $index => $schema_crumb) { // работаем с каждым элементом крошек
+				$crumb_element = $schema_crumb->first('a'); // сначала ищем A
 				
-				// получаем ссылку
-				$crumb_link = $crumb_element->getAttribute('href');
+				if (!is_null($crumb_element)){
+					
+					// получаем ссылку
+					$crumb_link = $crumb_element->getAttribute('href');
 
-				// проверка на пустоту, '#', '/' и null
-				// если пуст или '#', ставить текущую страницу
-				// если '/', рисовать главную
-				if (is_null($crumb_link) || ($crumb_link == '#')){
+					// проверка на пустоту, '#', '/' и null
+					// если пуст или '#', ставить текущую страницу
+					// если '/', рисовать главную
+					if (is_null($crumb_link) || ($crumb_link == '#')){
+						$crumb_link = $_SERVER['REQUEST_URI'];
+					}
+
+					// получаем текст ссылки
+					$crumb_name = trim($crumb_element->text());
+				} else {
+					// ссылки в элементе не обнаружено - значит, это либо разделитель, либо последняя крошка
 					$crumb_link = $_SERVER['REQUEST_URI'];
+					$crumb_name = trim($schema_crumb->text()); // внутренний текст из всего элемента, а не какого-то потомка
+
+					// проверка на текстовое содержание элемента. Если не подпадает - это разделитель, и его нужно пропустить
+
+					if (preg_match("/[a-zA-Zа-яА-Я]/u", $crumb_name) !== 1){
+						continue;
+					}
 				}
 
-				// получаем текст ссылки
-				$crumb_name = trim($crumb_element->text());
-			} else {
-				// ссылки в элементе не обнаружено - значит, это либо разделитель, либо последняя крошка
-				$crumb_link = $_SERVER['REQUEST_URI'];
-				$crumb_name = trim($schema_crumb->text()); // внутренний текст из всего элемента, а не какого-то потомка
+				// приводим ссылку к абсолютной
+				if (strpos($crumb_link, '//') === false){
 
-				// проверка на текстовое содержание элемента. Если не подпадает - это разделитель, и его нужно пропустить
+					$crumb_link = $schema_domain .'/'. trim($crumb_link, '/');
 
-				if (preg_match("/[a-zA-Zа-яА-Я]/u", $crumb_name) !== 1){
+					// добавляем закрывающий /
+					if ($schema_trail != false){
+						if ( (mb_strpos($crumb_link, '?') === false) && (mb_substr($crumb_link, -1, 1) !== $schema_trail) ){
+							$crumb_link .= $schema_trail;
+						}
+					}
+				}
+
+				// проверка на существование такого элемента в списке рендер-массива крошек
+				if (isset($schema_crumbs_resultItems[$crumb_link])){
 					continue;
 				}
+
+				// пополняем массив ['link' => 'name', ...]
+				$schema_crumbs_resultItems[$crumb_link] = $crumb_name;
 			}
 
-			// приводим ссылку к абсолютной
-			if (strpos($crumb_link, '//') === false){
-
-				$crumb_link = $schema_domain .'/'. trim($crumb_link, '/');
-
-				// добавляем закрывающий /
-				if ($schema_trail != false){
-					if ( (mb_strpos($crumb_link, '?') === false) && (mb_substr($crumb_link, -1, 1) !== $schema_trail) ){
-						$crumb_link .= $schema_trail;
-					}
+			// собрали массив ссылок, теперь формируем разметку
+			
+			$schema_breadcrumbs_crumbsJson = '';
+			$schema_index = 0;
+			foreach ($schema_crumbs_resultItems as $link => $name) {
+				// добавим запятую
+				if (strlen($schema_breadcrumbs_crumbsJson)){
+					$schema_breadcrumbs_crumbsJson .= ',';
 				}
+
+				// добавление json для крошки
+				$schema_breadcrumbs_crumbsJson .= '
+				{
+					"@type": "ListItem",
+					"position": '.($schema_index + 1).',
+					"item":
+						{
+							"@id": "'.$link.'",
+							"name": "'.$name.'"
+						}
+				}';
+
+				// увеличение индекса
+				$schema_index++;
 			}
 
-			// проверка на существование такого элемента в списке рендер-массива крошек
-			if (isset($schema_crumbs_resultItems[$crumb_link])){
-				continue;
-			}
-
-			// пополняем массив ['link' => 'name', ...]
-			$schema_crumbs_resultItems[$crumb_link] = $crumb_name;
-		}
-
-		// собрали массив ссылок, теперь формируем разметку
-		
-		$schema_breadcrumbs_crumbsJson = '';
-		$schema_index = 0;
-		foreach ($schema_crumbs_resultItems as $link => $name) {
-			// добавим запятую
-			if (strlen($schema_breadcrumbs_crumbsJson)){
-				$schema_breadcrumbs_crumbsJson .= ',';
-			}
-
-			// добавление json для крошки
-			$schema_breadcrumbs_crumbsJson .= '
-			{
-				"@type": "ListItem",
-				"position": '.($schema_index + 1).',
-				"item":
-					{
-						"@id": "'.$link.'",
-						"name": "'.$name.'"
-					}
+			$schema_allResultEntities[] = '{
+				"@type": "BreadcrumbList",
+				"@id": "'.$schema_pageurl.'",
+				"itemListElement":[
+					'.$schema_breadcrumbs_crumbsJson.PHP_EOL.'
+				]
 			}';
-
-			// увеличение индекса
-			$schema_index++;
 		}
-
-		$schema_allResultEntities[] = '{
-			"@type": "BreadcrumbList",
-			"@id": "'.$schema_pageurl.'",
-			"itemListElement":[
-				'.$schema_breadcrumbs_crumbsJson.PHP_EOL.'
-			]
-		}';
 	}
+
+	/**
+	 * Собираем всю микроразметку вместе и выводим единым файлом
+	 * Должен быть массив, в котором каждый элемент содержит текст. Нам нужно просто сделать implode массива, обренуть в обертку Схемы, и вывести скрипт
+	*/
+
+	$schema_code = '{
+		"@context": "https://schema.org",
+		"@graph": [
+			'.implode($schema_allResultEntities, ',').PHP_EOL.'
+		]
+	}';
+
+	// Добавление разметки в DOM
+	$schema_element = new Element('script', $schema_code, array('type' => 'application/ld+json'));
+	$document->first('div')->appendChild($schema_element);
 }
-
-/**
- * Собираем всю микроразметку вместе и выводим единым файлом
- * Должен быть массив, в котором каждый элемент содержит текст. Нам нужно просто сделать implode массива, обренуть в обертку Схемы, и вывести скрипт
-*/
-
-$schema_code = '{
-	"@context": "https://schema.org",
-	"@graph": [
-		'.implode($schema_allResultEntities, ',').PHP_EOL.'
-	]
-}';
-
-// Добавление разметки в DOM
-$schema_element = new Element('script', $schema_code, array('type' => 'application/ld+json'));
-$document->first('div')->appendChild($schema_element);

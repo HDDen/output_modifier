@@ -5,13 +5,20 @@ require('_settings.php'); // настройки по-умолчанию
 define('HOMEDIR', get_homedir()); // ищем папку сайта ( /var/site.com ).
 
 // Определяем путь до output_modifier.php от корня сайта. Используется, например, в логгере
-define('WEBPPROJECT', __DIR__);
+if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/output_modifier.php')){
+	define('WEBPPROJECT', $_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION);
+} else {
+	define('WEBPPROJECT', __DIR__);
+}
+
 
 // подключение библиотек
 require_once WEBPPROJECT.'/libs/vendor/autoload.php';
 include_once WEBPPROJECT.'/staff/php/logger.php';
+include_once WEBPPROJECT.'/additional_works.php';
 
 use DiDom\Document;
+use DiDom\Element;
 use WebPConvert\Convert\Converters\Stack;
 
 //$reconvert = forced reconvert, $trusted = dont check availability & file existence
@@ -514,7 +521,9 @@ function is_selector($input){
 
 function process_webp($document, &$params = false){
 
+	$module_time = false;
 	if (WEBP_DEBUGMODE){
+		$module_time = microtime(true);
 		writeLog('process_webp(): Зашли в функцию');
 	}
 
@@ -573,6 +582,10 @@ function process_webp($document, &$params = false){
 		$process_on = implode(', ', $process_on);
 		$process_on = $document->find($process_on);
 	} else {
+		if (WEBP_DEBUGMODE){
+			writeLog('process_webp(): массив $process_on пуст');
+			writeLog('process_webp(): работали '. (microtime(true) - $module_time) . ' сек.');
+		}
 		return false;
 	}
 
@@ -779,15 +792,22 @@ function process_webp($document, &$params = false){
 
 	}
 
+	if (WEBP_DEBUGMODE){
+		writeLog('process_webp(): работали '. (microtime(true) - $module_time) . ' сек.');
+	}
+
 }
 
 function process_avif($document, &$params = false){
+	$module_time = false;
 	if (WEBP_DEBUGMODE){
+		$module_time = microtime(true);
 		writeLog('process_avif(): Зашли в функцию');
 	}
 	if (!$params['avif']['enabled'] || !$params['avif']['process_on']){
 		if (WEBP_DEBUGMODE){
 			writeLog('process_avif(): процессинг не включен в настройках! Выход.');
+			writeLog('process_avif(): работали '. (microtime(true) - $module_time) . ' сек.');
 		}
 
 		return false;
@@ -811,6 +831,7 @@ function process_avif($document, &$params = false){
 
 	if (WEBP_DEBUGMODE){
 		writeLog('process_avif(): обработали весь массив для avif');
+		writeLog('process_avif(): работали '. (microtime(true) - $module_time) . ' сек.');
 	}
 }
 
@@ -907,6 +928,11 @@ function process_avif_once($elem, &$params){
 }
 
 function process_lazy($document, &$params = false){
+	$module_time = false;
+	if (WEBP_DEBUGMODE){
+		$module_time = microtime(true);
+	}
+
 	if (isset($params['lazyload']) && (!empty($params['lazyload']))){
 		$process_on = array(); // массив общий
 
@@ -950,6 +976,10 @@ function process_lazy($document, &$params = false){
 			}
 		}
 
+	}
+
+	if (WEBP_DEBUGMODE){
+		writeLog('process_lazy(): работали '. (microtime(true) - $module_time) . ' сек.');
 	}
 
 }
@@ -1163,6 +1193,10 @@ function process_lazyload_once($elem, &$params){
 }
 
 function remove_lazy(&$document, &$params){
+	$module_time = false;
+	if (WEBP_DEBUGMODE){
+		$module_time = microtime(true);
+	}
 	// удаляем lazyloading с селекторов в массиве параметров
 	if ($params['ignore_lazy'] == false){
 		if (WEBP_DEBUGMODE){
@@ -1180,35 +1214,43 @@ function remove_lazy(&$document, &$params){
 
 	if (WEBP_DEBUGMODE){
 		writeLog('  remove_lazy(): убралу lazy у '.count($elems).' элементов');
+		writeLog('remove_lazy(): работали '. (microtime(true) - $module_time) . ' сек.');
 	}
 }
 
 function unlazy($elem, &$params = false){
 	// проверяет, установлен ли lazy в этом элементе. Если установлен, удаляет lazy-loading
+	// не всегда для lazy может быть селектор по тегу; выборка могла быть по селектору, но параметры берутся по тегу!
 	$tagname = $elem->tag;
 
-	if (isset($params['lazyload'][$tagname])){
+	if (!isset($params['lazyload'][$tagname])){
+		// Если нет умолчаний, назначаем тег 'div'.
+		$tagname = 'div';
+	}
 
-		$lazy_class = $params['lazyload'][$tagname]['class_add'];
-		$attr_store_orig = $params['lazyload'][$tagname]['attr_store_orig'];
-		$expand_area_attr = false;
-		if (isset($params['lazyload'][$tagname]['expand_attr'])){
-			$expand_area_attr = $params['lazyload'][$tagname]['expand_attr'];
+	// теперь общие шаги
+	$lazy_class = $params['lazyload'][$tagname]['class_add'];
+	$attr_store_orig = $params['lazyload'][$tagname]['attr_store_orig'];
+	$expand_area_attr = false;
+	if (isset($params['lazyload'][$tagname]['expand_attr'])){
+		$expand_area_attr = $params['lazyload'][$tagname]['expand_attr'];
+	}
+
+	// remove class
+	$elem_class = $elem->getAttribute('class');
+	if (!is_null($elem_class)){
+		$elem_class = explode(' ', $elem_class);
+		$class_exists = array_search($lazy_class, $elem_class);
+		if ($class_exists !== false){
+			unset($elem_class[$class_exists]);
 		}
+		$elem_class = implode(' ', $elem_class);
+		$elem->setAttribute('class', $elem_class);
+	}
 
-		// remove class
-		$elem_class = $elem->getAttribute('class');
-		if (!is_null($elem_class)){
-			$elem_class = explode(' ', $elem_class);
-			$class_exists = array_search($lazy_class, $elem_class);
-			if ($class_exists !== false){
-				unset($elem_class[$class_exists]);
-			}
-			$elem_class = implode(' ', $elem_class);
-			$elem->setAttribute('class', $elem_class);
-		}
-
-		// transform store-orig
+	// transform store-orig
+	$unlazied_src = $elem->getAttribute($attr_store_orig);
+	if ($tagname == 'img'){
 		// moving real image src from data-* to src/srcset attr
 		if ($attr_store_orig == 'data-srcset'){
 			$attr_store_unlaziedsrc = 'srcset';
@@ -1216,14 +1258,24 @@ function unlazy($elem, &$params = false){
 			$attr_store_unlaziedsrc = 'src';
 		}
 
-		$unlazied_src = $elem->getAttribute($attr_store_orig);
 		if (!is_null($unlazied_src)){
 			$elem->setAttribute($attr_store_unlaziedsrc, $unlazied_src);
 		}
 
 		// remove store target attr
 		$elem->removeAttribute($attr_store_orig);
-		// remove expand area attr
+	} else {
+		// если это div (фоллбэк), нужно подменить в style заглушку на картинку
+		$style = $elem->getAttribute('style');
+		if ($style){
+			$preloader = $params['lazyload'][$tagname]['inline_preloader_picture'];
+			$style = str_replace($preloader, $unlazied_src, $style);
+			$elem->setAttribute('style', $style);
+		}
+	}
+	
+	// remove expand area attr
+	if ($expand_area_attr && $elem->hasAttribute($expand_area_attr)){
 		$elem->removeAttribute($expand_area_attr);
 	}
 }
@@ -1539,7 +1591,9 @@ function parsePathFromSrc($image_orig_uri, $home_dir = false){
 }
 
 function do_additional_operations(&$document, &$params){
+	$module_time = false;
 	if (WEBP_DEBUGMODE){
+		$module_time = microtime(true);
 		writeLog('do_additional_operations(): Старт...');
 	}
 
@@ -1559,18 +1613,31 @@ function do_additional_operations(&$document, &$params){
 			process_instantpage($document, $params);
 		}
 	}
+
+	if (WEBP_DEBUGMODE){
+		writeLog('do_additional_operations(): работали '. (microtime(true) - $module_time) . ' сек.');
+	}
 }
 
 // раз уж мы всё равно загрузили DiDOM, можем выполнить какие-то операции с готовой разметкой, ради которых без парсера нам бы пришлось лопатить код модулей
 // например, можно удалить невидимый и нарушающий иерархию h2 от хлебных крошек
 function do_additional_hardcoded_operations(&$document, &$params){
+	$module_time = false;
 	if (WEBP_DEBUGMODE){
+		$module_time = microtime(true);
 		writeLog('do_additional_hardcoded_operations(): Старт...');
 	}
 
-	$hardcoded_code_file = 'additional_works.php';
-	if (!file_exists(dirname(__FILE__).'/'.$hardcoded_code_file) || (filesize(dirname(__FILE__).'/'.$hardcoded_code_file) < 9 )){
-		if (WEBP_DEBUGMODE){
+	/*$hardcoded_code_file = WEBPPROJECT.'/additional_works.php';
+	if (!file_exists($hardcoded_code_file) || (filesize($hardcoded_code_file) < 9 )){
+		
+		// проверка фоллбэка
+		if (defined('OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION')){
+			$fallback_path = $_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/additional_works.php';
+			if (file_exists($hardcoded_code_file) && (filesize($hardcoded_code_file) > 8 )){
+				$hardcoded_code_file = $fallback_path;
+			}
+		} else if (WEBP_DEBUGMODE){
 			writeLog('do_additional_hardcoded_operations(): '.$hardcoded_code_file.' отсутствует или пуст. Выход...');
 		}
 
@@ -1578,11 +1645,22 @@ function do_additional_hardcoded_operations(&$document, &$params){
 	}
 
 	if (WEBP_DEBUGMODE){
-		writeLog('do_additional_hardcoded_operations(): Подключаем php доп. операций');
+		writeLog('do_additional_hardcoded_operations(): Подключаем php доп. операций, путь:'.PHP_EOL.$hardcoded_code_file);
 	}
-	include_once($hardcoded_code_file);
+	include_once($hardcoded_code_file);*/
+
+	if (function_exists('didom_hardcoded_ops')){
+		$didom_hardcoded_result = didom_hardcoded_ops($document, $params);
+	} else {
+		if (WEBP_DEBUGMODE){
+			writeLog('do_additional_hardcoded_operations(): функции didom_hardcoded_ops() не существует. Выход...');
+		}
+		return false;
+	}
+
 	if (WEBP_DEBUGMODE){
-		writeLog('do_additional_hardcoded_operations(): Инклуд прошёл, отработали');
+		writeLog('do_additional_hardcoded_operations(): Инклуд прошёл, отработали, результат '.($didom_hardcoded_result ? 'true' : 'false'));
+		writeLog('do_additional_hardcoded_operations(): работали '. (microtime(true) - $module_time) . ' сек.');
 	}
 	return true;
 }
@@ -1705,21 +1783,21 @@ function convertUriToCDN($uri = false, &$params = false){
 }
 
 function modifyImagesWebp($output, $params = false){
+	// add debug-headers
+	$module_time = false;
+	if ($params['debug'] || isset($_GET['outputmoddebug'])){
+		$module_time = microtime(true); // замер скорости работы
+		define('WEBP_DEBUGMODE', true);
+		add_debugheader('used', 'used');
+	} else {
+		define('WEBP_DEBUGMODE', false);
+	}
 
 	// mixing received params with defaults
 	$params = mix_params($params);
 
 	// set home directory
 	$home_dir = get_homedir();
-
-	// add debug-headers
-	if ($params['debug']){
-		add_debugheader('used', 'used');
-		define('WEBP_DEBUGMODE', true);
-		$start = microtime(true); // замер скорости работы
-	} else {
-		define('WEBP_DEBUGMODE', false);
-	}
 
 	if (WEBP_DEBUGMODE){
 		writeLog('Стартовали');
@@ -1809,16 +1887,16 @@ function modifyImagesWebp($output, $params = false){
 	// Воюем с кодировкой
 	$moddedhtml = html_entity_decode($moddedhtml);
 
-	// конец замеров скорости работы
-	if ($params['debug']){
-		$time_to_work = microtime(true) - $start;
-		add_debugheader('worked_in', $time_to_work);
-	}
-
 	if (WEBP_DEBUGMODE){
 		writeLog(PHP_EOL.PHP_EOL.'Модификатор отработал'.PHP_EOL.PHP_EOL);
 	}
 
+	// конец замеров скорости работы
+	if (WEBP_DEBUGMODE){
+		$worked_in = microtime(true) - $module_time;
+		add_debugheader('worked_in', $worked_in);
+		writeLog('Весь модуль: работали '. $worked_in . ' сек.');
+	}
 	return $moddedhtml;
 }
 

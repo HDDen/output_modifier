@@ -6,9 +6,9 @@
 // путь к папке модификатора относительно корня сайта
 $webp_core_fallback_location = 'other-includ/webp';
 // автовычисление пути
-if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/'.$webp_core_fallback_location)){
-    $outputmod__docrootlength = strlen(rtrim($_SERVER['DOCUMENT_ROOT'], '/')) + 1; // docroot + slash
-    $webp_core_fallback_location = substr(__DIR__, $outputmod__docrootlength);
+if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/'.$webp_core_fallback_location.'/output_modifier.php')){
+    $outputmod__docrootlength = mb_strlen(rtrim($_SERVER['DOCUMENT_ROOT'], '/')); // docroot + slash
+    $webp_core_fallback_location = mb_substr(__DIR__, $outputmod__docrootlength);
     unset($outputmod__docrootlength);
 }
 // и зафиксируем в константе

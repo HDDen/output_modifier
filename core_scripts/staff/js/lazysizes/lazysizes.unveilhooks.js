@@ -129,7 +129,7 @@ For background images, use data-bg attribute:
 				}
 
 				// handle data-bg
-				bg = ((window.localStorage.getItem('avifsupp') == '1') && target.hasAttribute('data-avif')) ? target.getAttribute('data-avif') : target.getAttribute('data-bg');
+				bg = ((window.localStorage.getItem('avifsupp') == '1') && (target.tagName != 'IMG') && target.hasAttribute('data-avif')) ? target.getAttribute('data-avif') : target.getAttribute('data-bg');
 				if (bg) {
 					e.detail.firesLoad = true;
 					load = function(){
