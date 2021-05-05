@@ -1,6 +1,12 @@
 <?php
 
-require('_settings.php'); // настройки по-умолчанию
+include('_settings.php'); // настройки по-умолчанию
+if (!isset($default_params)){
+	include('default._settings.php');
+	if (!isset($default_params)){
+		return false; // если не подключили параметры даже по запасному пути, уходим
+	}
+}
 
 define('HOMEDIR', get_homedir()); // ищем папку сайта ( /var/site.com ).
 
@@ -490,7 +496,13 @@ function add_fallback_alt(&$elem, &$params){
 // Смешиваем полученные параметры с дефолтными
 function mix_params($params = false){
 
-	require('_settings.php'); // чтобы заполучить дефолтные параметры
+	include('_settings.php'); // чтобы заполучить дефолтные параметры
+	if (!isset($default_params)){
+		include('default._settings.php');
+		if (!isset($default_params)){
+			return false; // если не подключили параметры даже по запасному пути, уходим
+		}
+	}
 
 	if ($params){
 		$mixed_params_array = array_replace_recursive($default_params, $params);
