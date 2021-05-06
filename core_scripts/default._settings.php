@@ -101,3 +101,8 @@ $default_params = array(
     'img_setsize' => false, // false / integer, mode for adding width/height attributes to al <img>
     'fallback_alt' => false, // add empty 'alt'-attribute if doesnt exists
 );
+
+// настройки конвертеров
+$global_converters = array('cwebp', 'vips', 'imagick', 'gmagick', 'imagemagick', 'graphicsmagick', 'wpc', 'gd');
+$jpg_converters = array('cwebp', 'vips', 'imagick', 'gmagick', 'imagemagick', 'graphicsmagick', 'wpc');
+$png_converters = array('cwebp', 'vips', 'imagick', 'gmagick', 'imagemagick', 'graphicsmagick', 'wpc');

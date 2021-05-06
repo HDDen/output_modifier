@@ -82,20 +82,21 @@ function convertWebpDem($source = false, $destination = false, $reconvert = fals
             $destination = strtok($source, '?') . '.webp';
         }
 
-        // проверка на переконвертирование
-        if (file_exists($destination)){
-            if (!$reconvert){
-
-                if (defined('WEBP_DEBUGMODE') && (WEBP_DEBUGMODE)){
-                    if (function_exists('writeLog')){
-                        writeLog('  convertWebpDem(): Файл уже существует, переконвертирование не разрешено');
-                    }
-                }
-
-                return true;
-            }
-        }
     }
+
+	// проверка на переконвертирование
+	if (file_exists($destination)){
+		if (!$reconvert){
+
+			if (defined('WEBP_DEBUGMODE') && (WEBP_DEBUGMODE)){
+				if (function_exists('writeLog')){
+					writeLog('  convertWebpDem(): Файл уже существует, переконвертирование не разрешено');
+				}
+			}
+
+			return true;
+		}
+	}
 
     // проверка на тип файла - пропускаем только jpeg и png. Должна проверяться даже если стоит флаг trusted
     $src_mimetype = mime_content_type(strtok($source, '?'));
@@ -236,6 +237,25 @@ function convertWebpDem($source = false, $destination = false, $reconvert = fals
         $options['converter-options']['cwebp']['command-line-options'] = WEBP_CWEBP_COMMAND;
     }
 
+	// override based on _settings
+	include('_settings.php'); // настройки по-умолчанию
+	if (!isset($default_params)){
+		include('default._settings.php');
+	}
+	if (isset($default_params)){
+		if (isset($global_converters)){
+			$options['converters'] = $global_converters;
+		}
+
+		if (isset($jpg_converters)){
+			$options['jpg']['converters'] = $jpg_converters;
+		}
+
+		if (isset($png_converters)){
+			$options['png']['converters'] = $png_converters;
+		}
+	}
+
     // debug options
     if (defined('WEBP_DEBUGMODE') && (WEBP_DEBUGMODE)){
         if (function_exists('writeLog')){
@@ -244,7 +264,19 @@ function convertWebpDem($source = false, $destination = false, $reconvert = fals
         }
     }
 
-    Stack::convert($source, $destination, $options, $logger=null);
+	try {
+		Stack::convert($source, $destination, $options, $logger=null);
+	} catch (Exception $e){
+		if (isset($e)){
+			if (defined('WEBP_DEBUGMODE') && (WEBP_DEBUGMODE)){
+				if (function_exists('writeLog')){
+					writeLog('  convertWebpDem(): Возвращаем false - закралась ошибка');
+					writeLog('  convertWebpDem(): '.$e->getMessage());
+				}
+			}
+			return false;
+		}
+	}
 
     if (defined('WEBP_DEBUGMODE') && (WEBP_DEBUGMODE)){
         if (function_exists('writeLog')){
@@ -386,7 +418,7 @@ function get_homedir(){
 	if (defined('DRUPAL_ROOT')){
 		return DRUPAL_ROOT;
 	} else {
-		return $_SERVER['DOCUMENT_ROOT'];
+		return rtrim($_SERVER['DOCUMENT_ROOT'], '/');
 	}
 }
 
@@ -683,7 +715,9 @@ function process_webp($document, &$params = false){
 		if (!$unwebpmarker){
 			$unwebpmarker = $document->first('div');
 		}
-		$unwebpmarker->setAttribute('data-webpprefix', '/'.trim($params['webp']['store_converted_in'], '/'));
+		if ($unwebpmarker){
+			$unwebpmarker->setAttribute('data-webpprefix', '/'.trim($params['webp']['store_converted_in'], '/'));
+		}
 		unset($unwebpmarker);
 	}
 
@@ -1795,6 +1829,13 @@ function convertUriToCDN($uri = false, &$params = false){
 }
 
 function modifyImagesWebp($output, $params = false){
+	if (!$output){
+		return $output;
+	}
+
+	// mixing received params with defaults
+	$params = mix_params($params);
+	
 	// add debug-headers
 	$module_time = false;
 	if ($params['debug'] || isset($_GET['outputmoddebug'])){
@@ -1804,9 +1845,6 @@ function modifyImagesWebp($output, $params = false){
 	} else {
 		define('WEBP_DEBUGMODE', false);
 	}
-
-	// mixing received params with defaults
-	$params = mix_params($params);
 
 	// set home directory
 	$home_dir = get_homedir();
