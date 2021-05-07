@@ -1,12 +1,12 @@
 
 # output_modifier
-Набор php-скриптов для добавления к сайту webp/avif-изображений, LazyLoad (две библиотеки на выбор), и возможности модификации html-разметки. Используются проекты: [rosell-dk/webpconvert](https://github.com/rosell-dk/webp-convert), [Imangazaliev/DiDOM](https://github.com/Imangazaliev/DiDOM), [ApoorvSaxena/lozad.js](https://github.com/ApoorvSaxena/lozad.js), [aFarkas/lazysizes](https://github.com/aFarkas/lazysizes).
+Набор php-скриптов для добавления к сайту webp/avif-изображений, LazyLoad (две библиотеки на выбор + нативный атрибут), и возможности модификации html-разметки. Используются проекты: [rosell-dk/webpconvert](https://github.com/rosell-dk/webp-convert), [Imangazaliev/DiDOM](https://github.com/Imangazaliev/DiDOM), [ApoorvSaxena/lozad.js](https://github.com/ApoorvSaxena/lozad.js), [aFarkas/lazysizes](https://github.com/aFarkas/lazysizes).
 
 # Принцип работы:
 1) Output_modifier.php получает html-разметку;
 2) DiDOM строит из неё документ, собирает пути к исходным изображениям из указанных в _setings.php селекторов;
 3) WebpConvert получает список изображений, подлежащих конвертированию, преобразовывает их, и сообщает о результате;
-4) Если всё прошло гладко, DiDOM подставляет src webp-версии в указанный в _settings.php атрибут; далее подключается LazyLoad;
+4) Если всё прошло гладко, DiDOM подставляет src webp-версии в указанный в \_settings.php атрибут; далее подключается LazyLoad;
 5) Затем выполняются дополнительные модификации, включенные в настройках (добавление width/height и alt к img, подключение предзагрузки навигации), затем определённые пользователем операции, указанные в additional_works.php; затем документ преобразовывается назад в строку;
 6) Output_modifier.php возвращает html-разметку.
 7) ???????
@@ -30,7 +30,7 @@
 Avif-файлы не конвертируются "на лету", их нужно подготовить самим и положить либо рядом с оригиналами, либо в отдельную папку, сохранив оригинальную структуру папок, и указав эту подпапку в настройке $params['avif']['path_prefix'].
 Для webp тоже можно указать префикс пути, $params['webp']['store_converted_in'].
 
-Также, если нет возможности подключения плагина к сайту, можно использовать перенаправление запросов *.jpg/*.png на файл webp-on-demand.php. Пример такого перенаправления для apache:
+Также, если нет возможности подключения плагина к сайту, можно использовать перенаправление запросов \*.jpg/\*.png на файл webp-on-demand.php. Пример такого перенаправления для apache:
 
     #Redirect images to webp-on-demand.php (if browser supports webp)
     #RewriteCond %{HTTP_COOKIE} ^.*deb=true.*$ [NC]
