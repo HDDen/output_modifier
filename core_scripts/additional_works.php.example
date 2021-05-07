@@ -3,6 +3,9 @@ use DiDom\Document;
 use DiDom\Element;
 
 function didom_hardcoded_ops(&$document, &$params){
+	/**
+	 * Огрехи html
+	 */
 	// фиксим отсутствующий name у input
 	$inputs = $document->find('input');
 	if (count($inputs) > 0){
@@ -128,7 +131,9 @@ function didom_hardcoded_ops(&$document, &$params){
 	}
 	unset($nofollow_links);
 
-	// добавляем класс к первому слайду первого экрана
+	/**
+	 * добавляем класс к первому слайду первого экрана
+	 */
 	if ($_SERVER['REQUEST_URI'] == '/'){
 		$active_slide = $document->first('#block-views-slider-main .item-list li:first-child');
 		if ($active_slide){
@@ -222,6 +227,23 @@ function didom_hardcoded_ops(&$document, &$params){
 	}
 
 	/**
+     * Подмена сторонних ресурсов на собственные
+     */
+    $didom_externalRes_rewrite = array(
+        'fonts.googleapis.com/css?family=Ubuntu' => array('attr' => 'href', 'replace_with' => '/bitrix/modules/hdden.outputmodifier/core_scripts/_rewrite/css/ubuntu-font.css'),
+    );
+    foreach ($didom_externalRes_rewrite as $href_filter => $replace_data) {
+        $search_selector = ( ($replace_data['attr'] == 'href') ? 'link' : 'script' ) . '['. $replace_data['attr'] .'*="' . $href_filter . '"]';
+        $els = $document->find($search_selector);
+        if (count($els)){
+            foreach ($els as $elem) {
+                $elem->setAttribute($replace_data['attr'], $replace_data['replace_with']);
+            }
+        }
+    }
+	unset($didom_externalRes_rewrite);
+
+	/**
 	 * Добавление предзагрузки с проверкой на куки
 	 */
 
@@ -229,7 +251,6 @@ function didom_hardcoded_ops(&$document, &$params){
 	$do_css_nonblocking = false; // false/true/"whitelist"/"blacklist" доп. опция - делаем css неблокируемым (по мотивам https://www.methodlab.ru/articles/preload_speedup)
 	$do_css_nonblocking_arr = array(); // filter - array of hrefs, depends on $do_css_nonblocking-mode
 
-	// проверка куки. Если уже установлена - не делаем ничего
 	if ($didompreload_mode){
 
 		// нужно проверить, сможем ли мы встроить наш результат вычислений. Для этого должен быть доступен head-элемент, либо режим "headers"
@@ -300,16 +321,14 @@ function didom_hardcoded_ops(&$document, &$params){
 									if ($do_css_nonblocking == "blacklist"){
 										continue;
 									} else if ($do_css_nonblocking == "whitelist"){
-										$css->setAttribute('rel', 'preload');
-										$css->setAttribute('as', 'style');
-										$css->setAttribute('onload', 'this.rel="stylesheet"');
+										$css->setAttribute('media', 'print');
+										$css->setAttribute('onload', "this.media='all'; this.onload=null;");
 									}
 								}
 							}
 						} else {
-							$css->setAttribute('rel', 'preload');
-							$css->setAttribute('as', 'style');
-							$css->setAttribute('onload', 'this.rel="stylesheet"');
+							$css->setAttribute('media', 'print');
+							$css->setAttribute('onload', "this.media='all'; this.onload=null;");
 						}
 					}
 				}
@@ -409,8 +428,8 @@ function didom_hardcoded_ops(&$document, &$params){
 	/**
 	 *  Секция для разметки Breadcrumbs
 	 *	Нужно получить всех детей контейнера, и в каждом сначала искать A, а если его нет - брать сам элемент (fallback)
-	*	При обработке фоллбэка нужно проверять текстовое значение узла. Если не [a-zA-Zа-яА-Я] - это простой разделитель, не добавлять его
-	*/
+	 *	При обработке фоллбэка нужно проверять текстовое значение узла. Если не [a-zA-Zа-яА-Я] - это простой разделитель, не добавлять его
+	 */
 
 	$schema_breadcrumbsSelector = '.breadcrumbs .breadcrumb'; // контейнер, в котором будем искать крошки
 

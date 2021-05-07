@@ -248,7 +248,7 @@ function convertWebpDem($source = false, $destination = false, $reconvert = fals
 		}
 
 		if (isset($jpg_converters)){
-			$options['jpg']['converters'] = $jpg_converters;
+			$options['jpeg']['converters'] = $jpg_converters;
 		}
 
 		if (isset($png_converters)){

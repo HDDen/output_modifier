@@ -45,3 +45,39 @@ webp-on-demand.php : можно настроить использование ng
   RewriteCond %{HTTP_USER_AGENT} Chrome [OR]
   RewriteCond %{HTTP_USER_AGENT} "Google Page Speed Insights"
   RewriteRule ^(.*)\.(jpe?g|png)$ /other-includ/webp/webp-on-demand-proxy.php [NC,L]
+
+Пример с nginx:
+
+# check supporting webp/avif
+map $http_accept $image_nextgen_format {
+  default   "";
+  "~*avif"  ".avif";
+  "~*webp"  ".webp";
+}
+map $http_accept $image_nextgen_path {
+  default   "";
+  "~*avif"  "/avif";
+  "~*webp"  "/webp";
+}
+
+server{
+  location / {
+    ...
+    # просто добавляем тип для avif
+    location ~* .avif$ {
+      types {
+        image/avif avif;
+      }
+      default_type image/avif;
+      expires 365d;
+      try_files $uri $uri/;
+    }
+    # рулим правилами для преобразования
+    location ~* ^.+\.(jpe?g|png)$ {
+      expires 365d;
+      default_type image/avif; # небезопасно! Переопределение дефолта, но по идее должно отрабатывать корректно
+      try_files $image_nextgen_path$uri$image_nextgen_format /bitrix/modules/hdden.outputmodifier/core_scripts/webp-on-demand.php;
+    }
+    ...
+  }
+}
