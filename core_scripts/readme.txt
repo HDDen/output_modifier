@@ -44,7 +44,7 @@ webp-on-demand.php : можно настроить использование ng
   RewriteCond %{HTTP_ACCEPT} image/webp [NC,OR]
   RewriteCond %{HTTP_USER_AGENT} Chrome [OR]
   RewriteCond %{HTTP_USER_AGENT} "Google Page Speed Insights"
-  RewriteRule ^(.*)\.(jpe?g|png)$ /other-includ/webp/webp-on-demand-proxy.php [NC,L]
+  RewriteRule ^(.*)\.(jpe?g|png)$ /other-includ/webp/webp-on-demand.php [NC,L]
 
 Пример с nginx:
 
