@@ -76,7 +76,49 @@ server{
     location ~* ^.+\.(jpe?g|png)$ {
       expires 365d;
       default_type image/avif; # небезопасно! Переопределение дефолта, но по идее должно отрабатывать корректно
-      try_files $image_nextgen_path$uri$image_nextgen_format /bitrix/modules/hdden.outputmodifier/core_scripts/webp-on-demand.php;
+      try_files $image_nextgen_path$uri$image_nextgen_format /php/webp/core_scripts/webp-on-demand.php;
+    }
+    ...
+  }
+}
+
+
+
+
+
+Немного иной пример, проверяем сначала avif-версию, затем webp, а затем отправляемся в php. А в предыдущем мы искали только самый максимальный формат, а webp отдавали средствами php
+
+# check supporting webp/avif
+map $http_accept $avif_format {
+  default   "";
+  "~*avif"  ".avif";
+}
+map $http_accept $webp_format {
+  default   "";
+  "~*webp"  "/webp";
+}
+
+server{
+
+  set $avif_path /avif;
+  set $webp_path /webp;
+
+  location / {
+    ...
+    # просто добавляем тип для avif
+    location ~* .avif$ {
+      types {
+        image/avif avif;
+      }
+      default_type image/avif;
+      expires 365d;
+      try_files $uri $uri/;
+    }
+    # рулим правилами для преобразования
+    location ~* ^.+\.(jpe?g|png)$ {
+      expires 365d;
+      default_type image/avif; # небезопасно! Переопределение дефолта, но по идее должно отрабатывать корректно
+      try_files  $avif_path$uri$avif_format $webp_path$uri$webp_format /php/webp/core_scripts/webp-on-demand.php;
     }
     ...
   }

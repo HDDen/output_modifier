@@ -21,7 +21,9 @@ if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCAT
 // подключение библиотек
 require_once WEBPPROJECT.'/libs/vendor/autoload.php';
 include_once WEBPPROJECT.'/staff/php/logger.php';
-include_once WEBPPROJECT.'/additional_works.php';
+if (file_exists(WEBPPROJECT.'/additional_works.php')){
+	include_once WEBPPROJECT.'/additional_works.php';
+}
 
 use DiDom\Document;
 use DiDom\Element;
