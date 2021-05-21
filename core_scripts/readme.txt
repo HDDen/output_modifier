@@ -106,6 +106,12 @@ server{
     }
     # рулим правилами для преобразования
     location ~* ^.+\.(jpe?g|png)$ {
+      types {
+        image/jpeg jpeg jpg;
+        image/png png;
+        image/avif avif;
+        image/webp webp;
+      }
       expires 365d;
       #default_type image/avif; # небезопасно! Переопределение дефолта, но по идее должно отрабатывать корректно
       try_files  $avif_path$uri.avif $webp_path$uri.webp /php/webp/core_scripts/webp-on-demand.php $uri;
