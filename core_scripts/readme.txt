@@ -88,16 +88,6 @@ server{
 
 Немного иной пример, проверяем сначала avif-версию, затем webp, а затем отправляемся в php. А в предыдущем мы искали только самый максимальный формат, а webp отдавали средствами php
 
-# check supporting webp/avif
-map $http_accept $avif_format {
-  default   "";
-  "~*avif"  ".avif";
-}
-map $http_accept $webp_format {
-  default   "";
-  "~*webp"  "/webp";
-}
-
 server{
 
   set $avif_path /avif;
@@ -117,8 +107,8 @@ server{
     # рулим правилами для преобразования
     location ~* ^.+\.(jpe?g|png)$ {
       expires 365d;
-      default_type image/avif; # небезопасно! Переопределение дефолта, но по идее должно отрабатывать корректно
-      try_files  $avif_path$uri$avif_format $webp_path$uri$webp_format /php/webp/core_scripts/webp-on-demand.php;
+      #default_type image/avif; # небезопасно! Переопределение дефолта, но по идее должно отрабатывать корректно
+      try_files  $avif_path$uri.avif $webp_path$uri.webp /php/webp/core_scripts/webp-on-demand.php $uri;
     }
     ...
   }
