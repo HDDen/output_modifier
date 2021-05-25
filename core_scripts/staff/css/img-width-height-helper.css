@@ -2,3 +2,6 @@ img[width][height][style*="height:"],
 img[width][height][style*="width:"]{
 	height: auto!important;
 }
+img[width], img[height]{
+	object-fit: contain;
+}
