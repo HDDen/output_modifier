@@ -95,7 +95,7 @@ map $http_accept $avif_format {
 }
 map $http_accept $webp_format {
   default   "";
-  "~*webp"  "/webp";
+  "~*webp"  ".webp";
 }
 
 server{
@@ -121,5 +121,65 @@ server{
       try_files  $avif_path$uri$avif_format $webp_path$uri$webp_format /php/webp/core_scripts/webp-on-demand.php;
     }
     ...
+  }
+}
+
+
+
+И третий вариант; частный случай, полезен, если нужно передавать управление куда-то еще.
+
+# проверяем поддержку webp/avif
+map $http_accept $avif_format {
+  default   "";
+  "~*avif"  ".avif";
+}
+map $http_accept $webp_format {
+  default   "";
+  "~*webp"  ".webp";
+}
+
+server{
+
+  # установка путей
+  set $avif_path /avif;
+  set $webp_path /webp;
+
+  # просто добавляем тип для avif
+  location ~* .avif$ {
+    types {
+      image/avif avif;
+    }
+    default_type image/avif;
+    expires 365d;
+    try_files $uri $uri/;
+  }
+  # рулим правилами для преобразования
+  location ~* ^.+\.(jpe?g|png)$ {
+    types {
+      image/jpeg jpeg jpg;
+      image/png png;
+      image/avif avif;
+      image/webp webp;
+    }
+    expires 365d;
+    try_files  $avif_path$uri$avif_format $webp_path$uri$webp_format @webp_gen;
+  }
+  # локейшн генератора
+  location @webp_gen {
+    error_page   404  =  @shop_thumb;
+    include /etc/nginx/fastcgi_params;
+    fastcgi_intercept_errors on;
+    fastcgi_pass unix:/run/php/php7.2-fpm-ersh-svet.sock;
+    # fastcgi_pass unix:/run/php/php5.6-fpm-ersh.sock;
+    fastcgi_param  SCRIPT_NAME  /php/webp/webp-on-demand.php;
+    fastcgi_param  SCRIPT_FILENAME  $document_root/php/webp/webp-on-demand.php;
+  }
+  # сюда уйдёт управление в случае ошибки
+  location @shop_thumb {
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass unix:/run/php/php7.2-fpm-ers.sock;
+    # fastcgi_pass unix:/run/php/php5.6-fpm-ers.sock;
+    fastcgi_param  SCRIPT_NAME  /products/thumb.php;
+    fastcgi_param  SCRIPT_FILENAME  $document_root/products/thumb.php;
   }
 }

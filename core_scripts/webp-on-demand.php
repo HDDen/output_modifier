@@ -22,17 +22,13 @@ x-webp-convert-log: Serving converted file
 //setHeader('Content-Length: ' . filesize($filename));
 */
 
-$docRoot = rtrim($_SERVER["DOCUMENT_ROOT"], '/');
-$requestUriNoQS = explode('?', $_SERVER['REQUEST_URI'])[0];
-$relativeSrcPath = urldecode($requestUriNoQS);
-$source = $docRoot . $relativeSrcPath;           // Absolute file path to source file. Comes from the .htaccess
-$destination = $source . '.webp';     // Store the converted images besides the original images (other options are available!)
-$useNginx = false; // если есть nginx, то не устанавливаем headers и не используем readfile();
-
 /**
  * Функция отдачи файла
  */
-function give_file($file, $useNginx = false){
+function give_file($file, $useNginx = false, $addHeader = false){
+	if ($addHeader){
+		header($addHeader);
+	}
 	if ($useNginx){
 		header('X-Accel-Redirect: '.$file);
 	} else {
@@ -45,6 +41,60 @@ function give_file($file, $useNginx = false){
 		header('Expires: '. gmdate('D, d M Y H:i:s \G\M\T', time() + 31536000));
 		readfile($file);
 	}
+}
+
+/**
+ * Настройки файла обслуживания
+ */
+
+$docRoot = rtrim($_SERVER["DOCUMENT_ROOT"], '/');
+$requestUriNoQS = explode('?', $_SERVER['REQUEST_URI'])[0];
+$relativeSrcPath = urldecode($requestUriNoQS);
+$source = $docRoot . $relativeSrcPath;           // Absolute file path to source file. Comes from the .htaccess
+$destination = $source . '.webp';     // Store the converted images besides the original images (other options are available!)
+$useNginx = false; // если есть nginx, то не устанавливаем headers и не используем readfile();
+
+/**
+ * Наследование общих настроек проекта
+ */
+$settings_file = rtrim(__DIR__, '/') . '/_settings.php';
+if (!file_exists($settings_file)){
+	$settings_file = rtrim(__DIR__, '/') . '/default._settings.php';
+}
+
+include($settings_file); // path to core folder
+
+if (!isset($default_params)){
+	// настройки не подтянулись - отдаём оригинал
+	give_file($source, $useNginx, 'X-webp-on-demand: give orig');
+	die();
+}
+
+if (!defined('WEBPPROJECT')){
+	define('WEBPPROJECT', __DIR__);
+}
+
+/**
+ * Подключение доп. библиотек, зависящих от общих настроек. Например, это логгер
+ */
+include_once WEBPPROJECT.'/staff/php/logger.php';
+
+if (function_exists('writeLog') && isset($default_params['debug']) && $default_params['debug']){
+	$debugmode = true;
+} else {
+	$debugmode = false;
+}
+
+/**
+ * Проверим source - ибо без него нет смысла в дальнейших мероприятиях
+ */
+if (!file_exists($source)){
+	// нужно записать в лог и крешнуться
+	if ($debugmode){
+		writeLog('Webp-On-Demand: Нет файла "'.$source.'"');
+	}
+	header("HTTP/1.0 404 Not Found");
+    exit;
 }
 
 /**
@@ -98,19 +148,6 @@ $servingOpts = array(
 
 	//'reconvert' => true,
 );
-
-/**
- * Наследование общих настроек проекта
- */
-include('_settings.php'); // path to core folder
-if (!isset($default_params)){
-	include('default._settings.php');
-}
-if (!isset($default_params)){
-	// настройки не подтянулись - отдаём оригинал
-	give_file($source, $useNginx);
-	die();
-}
 
 // определение кастомного пути для webp
 if ($default_params['webp']['store_converted_in']){
@@ -169,7 +206,21 @@ require_once $webpconvert_autoload_path;
 use WebPConvert\WebPConvert;
 
 if (!file_exists($destination)){ // если webp не существует - конвертим, а если нет конвертера - отдаём источник
-	WebPConvert::serveConverted($source, $destination, $servingOpts);
+	try {
+		if ($debugmode){
+			writeLog('Webp-On-Demand: $dest не существует, начинаем конвертирование "'.$source.'"');
+		}
+		WebPConvert::serveConverted($source, $destination, $servingOpts);
+	} catch (Exception $e) {
+		if (isset($e)){
+			// лог, и отдача оригинала, может еще что-то
+			if ($debugmode){
+				writeLog('Webp-On-Demand: Не удалось сконвертировать "'.$source.'", ниже лог '.PHP_EOL.$e->getMessage());
+			}
+			header("HTTP/1.0 404 Not Found");
+    		exit;
+		}
+	}
 } else {
 	// проверим метку времени. Если webp старее оригинала - обновим.
 	$timestampSource = filemtime($source);
@@ -178,9 +229,24 @@ if (!file_exists($destination)){ // если webp не существует - к
         ($timestampDestination !== false) &&
         ($timestampSource > $timestampDestination)) {
 			$servingOpts['reconvert'] = true;
-            WebPConvert::serveConverted($source, $destination, $servingOpts);
+			header('X-webp-on-demand: try to convert');
+			try {
+				if ($debugmode){
+					writeLog('Webp-On-Demand: Реконверт "'.$source.'"');
+				}
+				WebPConvert::serveConverted($source, $destination, $servingOpts);
+			} catch (Exception $e) {
+				if (isset($e)){
+					// лог, и отдача оригинала, может еще что-то
+					if ($debugmode){
+						writeLog('Webp-On-Demand: Реконверт неудачный - "'.$source.'", ниже лог '.PHP_EOL.$e->getMessage());
+					}
+					header("HTTP/1.0 404 Not Found");
+    				exit;
+				}
+			}
     } else {
-    	give_file($destination, $useNginx);
+    	give_file($destination, $useNginx, 'X-webp-on-demand: give old webp');
     }
 }
 
