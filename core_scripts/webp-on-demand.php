@@ -57,9 +57,13 @@ $useNginx = false; // если есть nginx, то не устанавлива�
 /**
  * Наследование общих настроек проекта
  */
-$settings_file = rtrim(__DIR__, '/') . '/_settings.php';
-if (!file_exists($settings_file)){
-	$settings_file = rtrim(__DIR__, '/') . '/default._settings.php';
+
+$settings_file = '_settings.'.$_SERVER['HTTP_HOST'].'.php';
+if (!file_exists(__DIR__.'/'.$settings_file)){
+	$settings_file = '_settings.php';
+}
+if (!file_exists(__DIR__.'/'.$settings_file)){
+	$settings_file = 'default._settings.php';
 }
 
 include($settings_file); // path to core folder

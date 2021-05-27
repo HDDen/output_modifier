@@ -1,12 +1,18 @@
 <?php
 
-include('_settings.php'); // настройки по-умолчанию
-if (!isset($default_params)){
+// detect settings file
+if (file_exists(__DIR__ . '/_settings.'.$_SERVER['HTTP_HOST'].'.php')){
+	include('_settings.'.$_SERVER['HTTP_HOST'].'.php');
+} else if (file_exists(__DIR__ . '/_settings.php')){
+	include('_settings.php');
+} else {
 	include('default._settings.php');
-	if (!isset($default_params)){
-		return false; // если не подключили параметры даже по запасному пути, уходим
-	}
 }
+
+if (!isset($default_params)){
+	return false; // если не подключили параметры даже по запасному пути, уходим
+}
+//
 
 define('HOMEDIR', get_homedir()); // ищем папку сайта ( /var/site.com ).
 
@@ -21,7 +27,9 @@ if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCAT
 // подключение библиотек
 require_once WEBPPROJECT.'/libs/vendor/autoload.php';
 include_once WEBPPROJECT.'/staff/php/logger.php';
-if (file_exists(WEBPPROJECT.'/additional_works.php')){
+if (file_exists(WEBPPROJECT.'/additional_works.'.$_SERVER['HTTP_HOST'].'.php')){
+	include_once WEBPPROJECT.'/additional_works.'.$_SERVER['HTTP_HOST'].'.php';
+} else if (file_exists(WEBPPROJECT.'/additional_works.php')){
 	include_once WEBPPROJECT.'/additional_works.php';
 }
 
