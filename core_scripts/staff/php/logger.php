@@ -9,9 +9,12 @@ writeLog($logdata, true); - true если начинаем писать лог �
 if (!function_exists('writeLog')){
     function writeLog($logdata = '', $newstarted = false){
 
-        $settings_filename = '_settings.php';
+        $settings_filename = '_settings.'.$_SERVER['HTTP_HOST'].'.php';
         if (!file_exists(WEBPPROJECT.'/'.$settings_filename)){
-            $settings_filename = 'default._settings.php';
+            $settings_filename = '_settings.php';
+            if (!file_exists(WEBPPROJECT.'/'.$settings_filename)){
+                $settings_filename = 'default._settings.php';
+            }
         }
         require(WEBPPROJECT.'/'.$settings_filename); // настройки по-умолчанию
 

@@ -538,12 +538,16 @@ function add_fallback_alt(&$elem, &$params){
 // Смешиваем полученные параметры с дефолтными
 function mix_params($params = false){
 
-	include('_settings.php'); // чтобы заполучить дефолтные параметры
-	if (!isset($default_params)){
+	if (file_exists(__DIR__ . '/_settings.'.$_SERVER['HTTP_HOST'].'.php')){
+		include('_settings.'.$_SERVER['HTTP_HOST'].'.php');
+	} else if (file_exists(__DIR__ . '/_settings.php')){
+		include('_settings.php');
+	} else {
 		include('default._settings.php');
-		if (!isset($default_params)){
-			return false; // если не подключили параметры даже по запасному пути, уходим
-		}
+	}
+	
+	if (!isset($default_params)){
+		return false; // если не подключили параметры даже по запасному пути, уходим
 	}
 
 	if ($params){
@@ -801,28 +805,6 @@ function process_webp($document, &$params = false){
 					$elem->setAttribute($store_webp_in, $webp_version);
 				}
 
-				// подклчючаем атрибут loading="lazy", нативная реализация lazy load.
-				// делаем отдельно от общего процесса lazy - если захотим отключить его, должна сохраниться возможность отдельно включать такую реализацию LL.
-				// но и делать отдельный проход по DOM только ради этого не стоит
-				if ($params['add_chromelazy_img'] !== false){
-					$elem->setAttribute('loading', $params['add_chromelazy_img']);
-				}
-
-				// подключаем атрибут decoding="async"
-				if ($params['asyncimg']){
-					$elem->setAttribute('decoding', 'async');
-				}
-
-				// добавление ширины/высоты
-				// просто берём src, и узнаём о нём информацию
-				if ($params['img_setsize']){
-					add_img_sizes($elem, $params['img_setsize']);
-				}
-
-				// Добавление пустого alt, если отсутствует
-				if ($params['fallback_alt']){
-					add_fallback_alt($elem, $params);	
-				}
 			} else if ($tagname == 'video') {
 				if ($cdn_webp_version){
 					$elem->setAttribute('poster', $cdn_webp_version);
@@ -1838,6 +1820,54 @@ function convertUriToCDN($uri = false, &$params = false){
 	return $cdn_path;
 }
 
+function additionalImgOperations($document, &$params = false){
+	if (!$params){
+		return false;
+	}
+
+	if (WEBP_DEBUGMODE){
+		writeLog('  additionalImgOperations(): зашли в функцию');
+	}
+
+	if ( !($params['add_chromelazy_img']) && !($params['asyncimg']) && !($params['img_setsize']) && !($params['fallback_alt']) ){
+		if (WEBP_DEBUGMODE){
+			writeLog('  additionalImgOperations(): не назначено ни одной доп. операции для <img>, выходим');
+		}
+		return false;
+	}
+
+	$imgs = $document->find('img');
+
+	foreach ($imgs as $elem) {
+		// подключаем атрибут loading="lazy", нативная реализация lazy load.
+		if ($params['add_chromelazy_img'] !== false){
+			$elem->setAttribute('loading', $params['add_chromelazy_img']);
+		}
+
+		// подключаем атрибут decoding="async"
+		if ($params['asyncimg']){
+			$elem->setAttribute('decoding', 'async');
+		}
+
+		// добавление ширины/высоты
+		// просто берём src, и узнаём о нём информацию
+		if ($params['img_setsize']){
+			add_img_sizes($elem, $params['img_setsize']);
+		}
+
+		// Добавление пустого alt, если отсутствует
+		if ($params['fallback_alt']){
+			add_fallback_alt($elem, $params);	
+		}
+	}
+
+	if (WEBP_DEBUGMODE){
+		writeLog('  additionalImgOperations(): закончили обработку');
+	}
+
+	return true;
+}
+
 function modifyImagesWebp($output, $params = false){
 	if (!$output){
 		return $output;
@@ -1906,14 +1936,17 @@ function modifyImagesWebp($output, $params = false){
 	process_avif($document, $params);
 	process_webp($document, $params);
 
-	// Шаг 2. Проходим LazyLoading
+	// Шаг 2. Операции для img
+	additionalImgOperations($document, $params);
+
+	// Шаг 3. Проходим LazyLoading
 	process_lazy($document, $params);
 
-	// Шаг 3. "Чёрный лист" для lazy-loading
+	// Шаг 4. "Чёрный лист" для lazy-loading
 	// Не используем метод matches(), т.к. он не работает со сложными селекторами типа ".parent .child"
 	remove_lazy($document, $params);
 
-	// Шаг 4. Дополнительные операции для DiDom, раз уж всё равно загрузили парсер.
+	// Шаг 5. Дополнительные операции для DiDom, раз уж всё равно загрузили парсер.
 	do_additional_operations($document, $params);
 	do_additional_hardcoded_operations($document, $params);
 
