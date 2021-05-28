@@ -100,6 +100,7 @@ $default_params = array(
     'asyncimg' => false, // false/true, will add attr "decoding=async" to all <img>
     'img_setsize' => false, // false / integer, mode for adding width/height attributes to al <img>
     'fallback_alt' => false, // add empty 'alt'-attribute if doesnt exists
+    'ignore_imgs' => false, // false or selectors
 );
 
 // настройки конвертеров

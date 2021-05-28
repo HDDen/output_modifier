@@ -1,8 +1,8 @@
 <?php
 
 // detect settings file
-if (file_exists(__DIR__ . '/_settings.'.$_SERVER['HTTP_HOST'].'.php')){
-	include('_settings.'.$_SERVER['HTTP_HOST'].'.php');
+if (file_exists(__DIR__ . '/_settings.'.$_SERVER['SERVER_NAME'].'.php')){
+	include('_settings.'.$_SERVER['SERVER_NAME'].'.php');
 } else if (file_exists(__DIR__ . '/_settings.php')){
 	include('_settings.php');
 } else {
@@ -27,8 +27,8 @@ if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCAT
 // подключение библиотек
 require_once WEBPPROJECT.'/libs/vendor/autoload.php';
 include_once WEBPPROJECT.'/staff/php/logger.php';
-if (file_exists(WEBPPROJECT.'/additional_works.'.$_SERVER['HTTP_HOST'].'.php')){
-	include_once WEBPPROJECT.'/additional_works.'.$_SERVER['HTTP_HOST'].'.php';
+if (file_exists(WEBPPROJECT.'/additional_works.'.$_SERVER['SERVER_NAME'].'.php')){
+	include_once WEBPPROJECT.'/additional_works.'.$_SERVER['SERVER_NAME'].'.php';
 } else if (file_exists(WEBPPROJECT.'/additional_works.php')){
 	include_once WEBPPROJECT.'/additional_works.php';
 }
@@ -538,8 +538,8 @@ function add_fallback_alt(&$elem, &$params){
 // Смешиваем полученные параметры с дефолтными
 function mix_params($params = false){
 
-	if (file_exists(__DIR__ . '/_settings.'.$_SERVER['HTTP_HOST'].'.php')){
-		include('_settings.'.$_SERVER['HTTP_HOST'].'.php');
+	if (file_exists(__DIR__ . '/_settings.'.$_SERVER['SERVER_NAME'].'.php')){
+		include('_settings.'.$_SERVER['SERVER_NAME'].'.php');
 	} else if (file_exists(__DIR__ . '/_settings.php')){
 		include('_settings.php');
 	} else {
@@ -577,7 +577,62 @@ function is_selector($input){
 	}
 }
 
-function process_webp($document, &$params = false){
+function addClass(&$elem, $class){
+	if (!$class){
+		return false;
+	}
+
+	$classList = $elem->getAttribute('class');
+	if ($classList){
+		if (mb_strpos($classList, $class) !== false){
+			return true;
+		} else {
+			$classList = $classList . ' '.$class;
+			$elem->setAttribute('class', $classList);
+		}
+	} else {
+		$elem->setAttribute('class', $class);
+	}
+
+	return true;
+}
+function removeClass(&$elem, $class){
+	if (!$class){
+		return false;
+	}
+
+	$classList = $elem->getAttribute('class');
+	if ($classList){
+		if (mb_strpos($classList, $class) !== false){
+			$classList = str_replace($class, '', $classList);
+			$elem->setAttribute('class', $classList);
+		}
+	}
+
+	return true;
+}
+function toggleClass(&$elem, $class){
+	if (!$class){
+		return false;
+	}
+
+	$classList = $elem->getAttribute('class');
+	if ($classList){
+		if (mb_strpos($classList, $class) !== false){
+			$classList = str_replace($class, '', $classList);
+			$elem->setAttribute('class', $classList);
+		} else {
+			$classList = $classList . ' '.$class;
+			$elem->setAttribute('class', $classList);
+		}
+	} else {
+		$elem->setAttribute('class', $class);
+	}
+
+	return true;
+}
+
+function process_webp(&$document, &$params = false){
 
 	$module_time = false;
 	if (WEBP_DEBUGMODE){
@@ -836,7 +891,7 @@ function process_webp($document, &$params = false){
 
 }
 
-function process_avif($document, &$params = false){
+function process_avif(&$document, &$params = false){
 	$module_time = false;
 	if (WEBP_DEBUGMODE){
 		$module_time = microtime(true);
@@ -873,7 +928,7 @@ function process_avif($document, &$params = false){
 	}
 }
 
-function process_avif_once($elem, &$params){
+function process_avif_once(&$elem, &$params){
 	// проверяем, что еще не обрабатывали элемент
 	if ($elem->hasAttribute('data-avif')){
 		if (WEBP_DEBUGMODE){
@@ -965,7 +1020,7 @@ function process_avif_once($elem, &$params){
 
 }
 
-function process_lazy($document, &$params = false){
+function process_lazy(&$document, &$params = false){
 	$module_time = false;
 	if (WEBP_DEBUGMODE){
 		$module_time = microtime(true);
@@ -1022,7 +1077,7 @@ function process_lazy($document, &$params = false){
 
 }
 
-function process_lazyload_once($elem, &$params){
+function process_lazyload_once(&$elem, &$params){
 	// процессинг ленивой загрузки для одного конкретного элемента
 	// универсальный для img и остальных
 	$tagname = $elem->tag;
@@ -1050,22 +1105,6 @@ function process_lazyload_once($elem, &$params){
 				$native_lazy_mode = 'lazy'; // переопределение на случай, если не выбран режим для loading-атрибута
 			}
 			$elem->setAttribute('loading', $native_lazy_mode);
-		}
-
-		// подключаем атрибут decoding="async"
-		if ($params['asyncimg']){
-			$elem->setAttribute('decoding', 'async');
-		}
-
-		// добавление ширины/высоты
-		// просто берём src, и узнаём о нём информацию
-		if ($params['img_setsize']){
-			add_img_sizes($elem, $params['img_setsize']);
-		}
-
-		// Добавление пустого alt, если отсутствует
-		if ($params['fallback_alt']){
-			add_fallback_alt($elem, $params);	
 		}
 
 		if ($params['lazyload']['img']['use_native']){
@@ -1256,7 +1295,7 @@ function remove_lazy(&$document, &$params){
 	}
 }
 
-function unlazy($elem, &$params = false){
+function unlazy(&$elem, &$params = false){
 	// проверяет, установлен ли lazy в этом элементе. Если установлен, удаляет lazy-loading
 	// не всегда для lazy может быть селектор по тегу; выборка могла быть по селектору, но параметры берутся по тегу!
 	$tagname = $elem->tag;
@@ -1377,9 +1416,9 @@ function generate_webp($elem, $filter_by_specific_extensions = false, $custom_pa
 					
 					// check for absolute link and store domain length
 					// will have relative path from root
-					$domain_length = mb_strpos($src, $_SERVER['HTTP_HOST']);
+					$domain_length = mb_strpos($src, $_SERVER['SERVER_NAME']);
 					if ($domain_length != false){
-						$relative_src_path = substr($src, ($domain_length + strlen($_SERVER['HTTP_HOST'])));
+						$relative_src_path = substr($src, ($domain_length + strlen($_SERVER['SERVER_NAME'])));
 					} else {
 						$relative_src_path = $src;
 					}
@@ -1570,7 +1609,7 @@ function parsePathFromSrc($image_orig_uri, $home_dir = false){
 
 	// первым делом мы должны проверить, внешний ли это урл, и принадлежит ли это нашему домену.
 	// если есть ttp:/ или tps:/ и, при этом, там НЕТ нашего домена, возвращаем false
-	if ( ( (strpos($image_orig_uri, 'ttp:/') !== false) || (strpos($image_orig_uri, 'tps:/') !== false) ) && ( strpos($image_orig_uri,$_SERVER['HTTP_HOST']) === false ) ){
+	if ( ( (strpos($image_orig_uri, 'ttp:/') !== false) || (strpos($image_orig_uri, 'tps:/') !== false) ) && ( strpos($image_orig_uri,$_SERVER['SERVER_NAME']) === false ) ){
 
 		if (WEBP_DEBUGMODE){
 			writeLog('      Внешний url, без нашего домена. Отказ.');
@@ -1597,7 +1636,7 @@ function parsePathFromSrc($image_orig_uri, $home_dir = false){
 	}
 
 	$search_by = $protocol . ':'; // проверяем, с хостом ли путь к картинке ( http<s>: )
-	$domain_replace = $protocol . '://' . $_SERVER['HTTP_HOST']; // будем удалять этот домен из uri
+	$domain_replace = $protocol . '://' . $_SERVER['SERVER_NAME']; // будем удалять этот домен из uri
 
 	if (strpos($image_orig_uri, $search_by) !== false){
     	$image_orig_abspath = str_replace($domain_replace, $home_dir, $image_orig_uri);
@@ -1718,6 +1757,12 @@ function process_instantpage(&$document, &$params){
 					$elem->setAttribute('data-instant', 'yes');
 				}
 			}
+
+			// mark body
+			$body = $document->first('body');
+			if ($body){
+				$body->setAttribute('data-instant-whitelist', 'true');
+			}
 		} else {
 			if (WEBP_DEBUGMODE){
 				writeLog('  process_instantpage(): селекторы не обнаружены - ничего не пометили');
@@ -1820,7 +1865,7 @@ function convertUriToCDN($uri = false, &$params = false){
 	return $cdn_path;
 }
 
-function additionalImgOperations($document, &$params = false){
+function additionalImgOperations(&$document, &$params = false){
 	if (!$params){
 		return false;
 	}
@@ -1839,6 +1884,13 @@ function additionalImgOperations($document, &$params = false){
 	$imgs = $document->find('img');
 
 	foreach ($imgs as $elem) {
+		// проверка на исключение по фильтру
+		if ($params['ignore_imgs']){
+			if ($elem->matches($params['ignore_imgs'])){
+				continue;
+			};
+		}
+
 		// подключаем атрибут loading="lazy", нативная реализация lazy load.
 		if ($params['add_chromelazy_img'] !== false){
 			$elem->setAttribute('loading', $params['add_chromelazy_img']);
@@ -1970,11 +2022,20 @@ function modifyImagesWebp($output, $params = false){
 			$moddedhtml = $document->html();
 		}
 	} else {
-		// получен body
+		// получен body. Наверное.
 		if (WEBP_DEBUGMODE){
 			writeLog('Получен элемент без <html>, возвращаем body->innerHTML');
 		}
-		$moddedhtml = $document->first('body')->innerHtml();
+
+		$check_body_is_exists = $document->first('body');
+		if ($check_body_is_exists){
+			$moddedhtml = $document->first('body')->innerHtml();
+		} else {
+			if (WEBP_DEBUGMODE){
+				writeLog('Получен элемент без <body>, возвращаем $document->html()');
+			}
+			$moddedhtml = $document->html(); 
+		}
 	}
 
 	// Воюем с кодировкой

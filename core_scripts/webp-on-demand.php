@@ -58,7 +58,7 @@ $useNginx = false; // если есть nginx, то не устанавлива�
  * Наследование общих настроек проекта
  */
 
-$settings_file = '_settings.'.$_SERVER['HTTP_HOST'].'.php';
+$settings_file = '_settings.'.$_SERVER['SERVER_NAME'].'.php';
 if (!file_exists(__DIR__.'/'.$settings_file)){
 	$settings_file = '_settings.php';
 }

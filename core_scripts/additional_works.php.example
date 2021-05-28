@@ -368,7 +368,7 @@ function didom_hardcoded_ops(&$document, &$params){
 		// если нет, нужно создать
 		$didom__canonical__cnt = $document->first('head');
 		if ($didom__canonical__cnt){
-			$didom__canonical = new Element('link', null, array('rel' => 'canonical', 'href' => strtolower(strtok('https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], '?'))));
+			$didom__canonical = new Element('link', null, array('rel' => 'canonical', 'href' => strtolower(strtok('https://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'], '?'))));
 			$didom__canonical__cnt->appendChild($didom__canonical);
 		}
 	}
@@ -377,7 +377,7 @@ function didom_hardcoded_ops(&$document, &$params){
 	 * Добавляем микроразметку
 	 */
 
-	$schema_domain = 'https://'.trim($_SERVER['HTTP_HOST'], '/');
+	$schema_domain = 'https://'.trim($_SERVER['SERVER_NAME'], '/');
 	$schema_sitename = 'Стоматология Максима Шубных';
 	$schema_trail = ''; // '' или '/'. Добавлять ли закрывающий слэш к url
 

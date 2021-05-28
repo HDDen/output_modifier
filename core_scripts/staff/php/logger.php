@@ -9,7 +9,7 @@ writeLog($logdata, true); - true если начинаем писать лог �
 if (!function_exists('writeLog')){
     function writeLog($logdata = '', $newstarted = false){
 
-        $settings_filename = '_settings.'.$_SERVER['HTTP_HOST'].'.php';
+        $settings_filename = '_settings.'.$_SERVER['SERVER_NAME'].'.php';
         if (!file_exists(WEBPPROJECT.'/'.$settings_filename)){
             $settings_filename = '_settings.php';
             if (!file_exists(WEBPPROJECT.'/'.$settings_filename)){
