@@ -248,11 +248,18 @@ function convertWebpDem($source = false, $destination = false, $reconvert = fals
     }
 
 	// override based on _settings
-	include('_settings.php'); // настройки по-умолчанию
-	if (!isset($default_params)){
+
+	// detect settings file
+	if (file_exists(__DIR__ . '/_settings.'.$_SERVER['SERVER_NAME'].'.php')){
+		include('_settings.'.$_SERVER['SERVER_NAME'].'.php');
+	} else if (file_exists(__DIR__ . '/_settings.php')){
+		include('_settings.php');
+	} else {
 		include('default._settings.php');
 	}
-	if (isset($default_params)){
+
+	if (!isset($default_params)){
+		//return false; // если не подключили параметры даже по запасному пути, уходим
 		if (isset($global_converters)){
 			$options['converters'] = $global_converters;
 		}
@@ -265,6 +272,7 @@ function convertWebpDem($source = false, $destination = false, $reconvert = fals
 			$options['png']['converters'] = $png_converters;
 		}
 	}
+	//
 
     // debug options
     if (defined('WEBP_DEBUGMODE') && (WEBP_DEBUGMODE)){
