@@ -2,6 +2,9 @@
 
 /**
  * Class OutputmodMinify
+ * 
+ * include_once 'OutputmodMinify.php';
+ * $html = \OutputmodMinify::minify($html);
  */
 /**
  * -----------------------------------------------------------------------------------------
