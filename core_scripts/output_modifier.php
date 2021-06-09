@@ -26,6 +26,7 @@ if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCAT
 
 // подключение библиотек
 require_once WEBPPROJECT.'/libs/vendor/autoload.php';
+include_once WEBPPROJECT.'/staff/php/OutputmodMinify.php';
 include_once WEBPPROJECT.'/staff/php/logger.php';
 if (file_exists(WEBPPROJECT.'/additional_works.'.$_SERVER['SERVER_NAME'].'.php')){
 	include_once WEBPPROJECT.'/additional_works.'.$_SERVER['SERVER_NAME'].'.php';
@@ -36,6 +37,7 @@ if (file_exists(WEBPPROJECT.'/additional_works.'.$_SERVER['SERVER_NAME'].'.php')
 use DiDom\Document;
 use DiDom\Element;
 use WebPConvert\Convert\Converters\Stack;
+// use OutputmodMinify;
 
 //$reconvert = forced reconvert, $trusted = dont check availability & file existence
 function convertWebpDem($source = false, $destination = false, $reconvert = false, $trusted = false){
@@ -2047,7 +2049,17 @@ function modifyImagesWebp($output, $params = false){
 	}
 
 	// Воюем с кодировкой
-	$moddedhtml = html_entity_decode($moddedhtml);
+	if ($params['html_entity_decode']){
+		$moddedhtml = html_entity_decode($moddedhtml);
+	}
+
+	// Минификация
+	if ($params['minify_html']){
+		if (WEBP_DEBUGMODE){
+			writeLog('Запускаем минификацию');
+		}
+		$moddedhtml = \OutputmodMinify::minify($moddedhtml);
+	}
 
 	if (WEBP_DEBUGMODE){
 		writeLog(PHP_EOL.PHP_EOL.'Модификатор отработал'.PHP_EOL.PHP_EOL);

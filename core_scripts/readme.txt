@@ -23,28 +23,37 @@ webp-on-demand.php : можно настроить использование ng
 
 Также можно конвертировать изображение без прибегания к парсеру, напрямую через апач (пример взят из документации к webpconvert):
 
-# Redirect to existing converted image (under appropriate circumstances)
-  #RewriteCond %{HTTP_COOKIE} !^.*webpactive=false.*$ [NC]
-  #RewriteCond %{HTTP_REFERER} !admin [NC]
-  #RewriteCond %{HTTP_ACCEPT} image/webp [OR]
-  #RewriteCond %{HTTP_COOKIE} ^.*webpactive=true.*$ [NC]
-  #RewriteCond %{DOCUMENT_ROOT}/$1.$2.webp -f
-  #RewriteRule ^\/?(.*)\.(jpe?g|png)$ /$1.$2.webp [NC,T=image/webp,L]
+############################################################################
+#### Set webp-custom path                                               ####
+############################################################################
+RewriteRule .* - [E=WEBP_CUSTOM_PATH]
+#RewriteRule .* - [E=WEBP_CUSTOM_PATH:/webp]
+############################################################################
+#### Redirect to existing converted image (under appropriate circumstances) 
+############################################################################
+RewriteCond %{HTTP_COOKIE} !^.*webpactive=false.*$ [NC]
+RewriteCond %{HTTP_REFERER} !admin [NC]
+RewriteCond %{HTTP_ACCEPT} image/webp [OR]
+RewriteCond %{HTTP_COOKIE} ^.*webpactive=true.*$ [NC]
+RewriteCond %{DOCUMENT_ROOT}%{WEBP_CUSTOM_PATH}e/$1.$2.webp -f
+RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{WEBP_CUSTOM_PATH}e/$1.$2.webp [NC,T=image/webp,L]
 
-  # Redirect images to webp-on-demand.php (if browser supports webp)
-  #RewriteCond %{HTTP_COOKIE} ^.*deb=true.*$ [NC]
-  #RewriteCond %{HTTP_HOST} ^(.*)\.site\.ru$ [NC] # для конкретного сайта / поддомена
-  RewriteCond %{HTTP_COOKIE} !^.*webpactive=false.*$ [NC]
-  RewriteCond %{HTTP_REFERER} !admin [NC]
-  #RewriteCond %{REQUEST_URI} !^/admin(.*)$ [NC]
-  #RewriteCond %{REQUEST_URI} !^admin(.*)$ [NC]
-  RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png)$ [NC]
-  RewriteCond %{REQUEST_FILENAME} -f
-  RewriteCond %{HTTP_COOKIE} ^.*webpactive=true.*$ [NC,OR]
-  RewriteCond %{HTTP_ACCEPT} image/webp [NC,OR]
-  RewriteCond %{HTTP_USER_AGENT} Chrome [OR]
-  RewriteCond %{HTTP_USER_AGENT} "Google Page Speed Insights"
-  RewriteRule ^(.*)\.(jpe?g|png)$ /other-includ/webp/webp-on-demand.php [NC,L]
+############################################################################
+#### Redirect images to webp-on-demand.php (if browser supports webp)   ####
+############################################################################
+#RewriteCond %{HTTP_COOKIE} ^.*deb=true.*$ [NC]
+#RewriteCond %{HTTP_HOST} ^(.*)\.site\.ru$ [NC] # для конкретного сайта / поддомена
+RewriteCond %{HTTP_COOKIE} !^.*webpactive=false.*$ [NC]
+RewriteCond %{HTTP_REFERER} !admin [NC]
+#RewriteCond %{REQUEST_URI} !^/admin(.*)$ [NC]
+#RewriteCond %{REQUEST_URI} !^admin(.*)$ [NC]
+RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png)$ [NC]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteCond %{HTTP_COOKIE} ^.*webpactive=true.*$ [NC,OR]
+RewriteCond %{HTTP_ACCEPT} image/webp [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} Chrome [OR]
+RewriteCond %{HTTP_USER_AGENT} "Google Page Speed Insights"
+RewriteRule ^(.*)\.(jpe?g|png)$ /other-includ/webp/webp-on-demand.php [NC,L]
 
 Пример с nginx:
 

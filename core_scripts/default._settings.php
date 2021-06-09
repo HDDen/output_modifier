@@ -91,9 +91,10 @@ $default_params = array(
         'external' => false, // false/true for abspaths/subdomains
         'base_host' => false, // false or base domain like 'example.co.uk'
     ),
+    'html_entity_decode' => true, // process html_entity_decode() to result. Needed for Drupal
     'strip_html' => false, // return whole <html> document or only <body> inner
     'ignore_lazy' => false, // selectors for ignoring lazyload. In fact, these elems will be lazied, then unlazied :-/
-    'add_chromelazy_img' => false, // add loading="lazy" attr to img, false or attr value (auto|lazy|eager)
+    'add_chromelazy_img' => false, // (auto|lazy|eager) / false. add loading="lazy" attr to img
     'caching' => false, // opt for enabling/disabling caching
     'debug' => false, // opt for enabling/disabling debug headers
     'place_log' => false, // path for output_modifier logfile
@@ -101,6 +102,7 @@ $default_params = array(
     'img_setsize' => false, // false / integer, mode for adding width/height attributes to al <img>
     'fallback_alt' => false, // add empty 'alt'-attribute if doesnt exists
     'ignore_imgs' => false, // false or selectors
+    'minify_html' => false, // minifier
 );
 
 // настройки конвертеров
