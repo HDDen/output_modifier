@@ -102,7 +102,7 @@ $default_params = array(
     'img_setsize' => false, // false / integer, mode for adding width/height attributes to al <img>
     'fallback_alt' => false, // add empty 'alt'-attribute if doesnt exists
     'ignore_imgs' => false, // false or selectors
-    'minify_html' => false, // minifier
+    'minify_html' => false, // minifier. Very heavy process, recommended to use only with caching!
 );
 
 // настройки конвертеров
