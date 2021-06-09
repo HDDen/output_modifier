@@ -2057,8 +2057,12 @@ function modifyImagesWebp($output, $params = false){
 	if ($params['minify_html']){
 		if (WEBP_DEBUGMODE){
 			writeLog('Запускаем минификацию');
+			$minify_time = microtime(true);
 		}
 		$moddedhtml = \OutputmodMinify::minify($moddedhtml);
+		if (WEBP_DEBUGMODE){
+			writeLog('Минификация заняла '. (microtime(true) - $minify_time) . ' сек.');
+		}
 	}
 
 	if (WEBP_DEBUGMODE){
