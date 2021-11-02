@@ -21,23 +21,43 @@ lazysizes.min.js отвечает за поддержку на img, lazysizes.un
 
 webp-on-demand.php : можно настроить использование nginx ($useNginx = true;), а именно заголовок X-Accel-Redirect
 
-Также можно конвертировать изображение без прибегания к парсеру, напрямую через апач (пример взят из документации к webpconvert):
+Также можно конвертировать в webp или отдавать заранее подготовленный avif без прибегания к парсеру, напрямую через апач (сначала синхронизируйте настройки путей в default._settings.php и здесь в "ENV=WEBP_CUSTOM_PATH:", "ENV=AVIF_CUSTOM_PATH:" и "ENV=OUTPUT_MODIFIER_PATH:") :
 
+RewriteEngine On
 ############################################################################
-#### Set webp-custom path                                               ####
+#### Set processor path                                                 ####
 ############################################################################
-RewriteRule .* - [E=WEBP_CUSTOM_PATH]
-#RewriteRule .* - [E=WEBP_CUSTOM_PATH:/webp]
+RewriteRule .* - [ENV=OUTPUT_MODIFIER_PATH:/libraries/output_modifier]
 ############################################################################
-#### Redirect to existing converted image (under appropriate circumstances) 
+#### Set webp/avif custom path                                          ####
 ############################################################################
-RewriteCond %{HTTP_COOKIE} !^.*webpactive=false.*$ [NC]
+RewriteRule .* - [ENV=WEBP_CUSTOM_PATH]
+#RewriteRule .* - [ENV=WEBP_CUSTOM_PATH:/webp]
+RewriteRule .* - [ENV=AVIF_CUSTOM_PATH]
+#RewriteRule .* - [ENV=AVIF_CUSTOM_PATH:/avif]
+# debug
+Header set x-output-modifier-path %{OUTPUT_MODIFIER_PATH}e
+Header set x-webp-custom-path %{WEBP_CUSTOM_PATH}e
+Header set x-avif-custom-path %{AVIF_CUSTOM_PATH}e
+############################################################################
+#### Redirect to existing converted image (under appropriate circumstances)
+############################################################################
+# first, check avif
+RewriteCond %{REQUEST_FILENAME} (.*)\.(jpe?g|png)$
+RewriteCond %{HTTP_REFERER} !admin [NC]
+RewriteCond %{HTTP_ACCEPT} image/avif
+RewriteCond %{DOCUMENT_ROOT}%{ENV:AVIF_CUSTOM_PATH}%{REQUEST_URI}.avif -f
+RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{ENV:AVIF_CUSTOM_PATH}/$1.$2.avif [NC,T=image/avif,L]
+# if avif does not exists, check webp
+RewriteCond %{REQUEST_FILENAME} (.*)\.(jpe?g|png)$
+#RewriteCond %{HTTP_COOKIE} !^.*webpactive=false.*$ [NC]
 RewriteCond %{HTTP_REFERER} !admin [NC]
 RewriteCond %{HTTP_ACCEPT} image/webp [OR]
 RewriteCond %{HTTP_COOKIE} ^.*webpactive=true.*$ [NC]
-RewriteCond %{DOCUMENT_ROOT}%{WEBP_CUSTOM_PATH}e/$1.$2.webp -f
-RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{WEBP_CUSTOM_PATH}e/$1.$2.webp [NC,T=image/webp,L]
-
+RewriteCond %{HTTP_ACCEPT} !image/avif [OR]
+RewriteCond %{DOCUMENT_ROOT}%{ENV:AVIF_CUSTOM_PATH}%{REQUEST_URI}.avif !-f
+RewriteCond %{DOCUMENT_ROOT}%{ENV:WEBP_CUSTOM_PATH}%{REQUEST_URI}.webp -f
+RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{ENV:WEBP_CUSTOM_PATH}/$1.$2.webp [NC,T=image/webp,L]
 ############################################################################
 #### Redirect images to webp-on-demand.php (if browser supports webp)   ####
 ############################################################################
@@ -53,7 +73,8 @@ RewriteCond %{HTTP_COOKIE} ^.*webpactive=true.*$ [NC,OR]
 RewriteCond %{HTTP_ACCEPT} image/webp [NC,OR]
 RewriteCond %{HTTP_USER_AGENT} Chrome [OR]
 RewriteCond %{HTTP_USER_AGENT} "Google Page Speed Insights"
-RewriteRule ^(.*)\.(jpe?g|png)$ /other-includ/webp/webp-on-demand.php [NC,L]
+RewriteRule ^(.*)\.(jpe?g|png)$ %{ENV:OUTPUT_MODIFIER_PATH}/core_scripts/webp-on-demand.php [NC,L]
+
 
 Пример с nginx:
 
