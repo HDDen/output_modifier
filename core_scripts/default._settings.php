@@ -53,7 +53,7 @@ $default_params = array(
             'lazy' => false, // shortcut and option for quickly disable
             'class_add' => 'lazyload', // add classes, comma-separated (or just string with spaces? TODO!)
             'attr_store_orig' => 'data-srcset', // attr to store original, lazy-loaded img src
-            'inline_preloader_picture' => "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20874%20589'%3E%3C/svg%3E", // svg is free to resize
+            'inline_preloader_picture' => "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA4NzQgNTg5Jz48L3N2Zz4=", // svg is free to resize
             'expand_preload_area' => true, // expand image load area before it displays
             'expand_attr' => 'data-expand', // from where read 'expand_preload_area' parameter
             'expand_range' => '500', // default for expanding
@@ -63,7 +63,7 @@ $default_params = array(
             'lazy' => false, // dont process tag globally
             'class_add' => 'lazyload', // add classes, comma-separated (or just string with spaces? TODO!)
             'attr_store_orig' => 'data-background-image', // attr to store original, lazy-loaded img src
-            'inline_preloader_picture' => "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20874%20589'%3E%3C/svg%3E",
+            'inline_preloader_picture' => "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA4NzQgNTg5Jz48L3N2Zz4=",
             'expand_preload_area' => true, // expand image load area before it displays
             'expand_attr' => 'data-expand', // from where read 'expand_preload_area' parameter
             'expand_range' => '500', // default for expanding
