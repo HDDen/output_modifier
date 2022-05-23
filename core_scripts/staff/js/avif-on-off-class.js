@@ -1,19 +1,16 @@
-(function(){
-	var d = document.documentElement.classList;
+(function(d, sto){
 	if (!(d.contains("avif-checked"))){
 		// check localstorage
-		var sto = window.localStorage;
-		var localStorageWebp = sto.getItem('avifsupp');
-		if (localStorageWebp == '1'){
-			d.add("avif-on","avif-checked");
-		} else if (localStorageWebp == '0'){
-			d.add("avif-off","avif-checked");
+		const localStorageAvif = sto.getItem('avifsupp');
+		if (localStorageAvif === '1'){
+			d.add("avif-on");d.add("avif-checked"); // splitted for IE compatibility
+		} else if (localStorageAvif === '0'){
+			d.add("avif-off");d.add("avif-checked");
 		} else {
-			var avif = "data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=";
-			var img = new Image();
-			img.onload = function(){d.add("avif-on","avif-checked");sto.setItem('avifsupp', '1')};
-			img.onerror = function(){d.add("avif-off","avif-checked");sto.setItem('avifsupp', '0')};
-			img.src = avif;
+			const img = new Image();
+			img.onload = function(){d.add("avif-on");d.add("avif-checked");sto.setItem('avifsupp', '1')};
+			img.onerror = function(){d.add("avif-off");d.add("avif-checked");sto.setItem('avifsupp', '0')};
+			img.src = "data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=";
 		}
 	}
-})();
+}(document.documentElement.classList, window.localStorage));
