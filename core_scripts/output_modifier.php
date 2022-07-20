@@ -1737,7 +1737,13 @@ function do_additional_hardcoded_operations(&$document, &$params){
 	include_once($hardcoded_code_file);*/
 
 	if (function_exists('didom_hardcoded_ops')){
-		$didom_hardcoded_result = didom_hardcoded_ops($document, $params);
+		
+		try {
+			$didom_hardcoded_result = didom_hardcoded_ops($document, $params);
+		} catch (Exception $e) {
+			writeLog('do_additional_hardcoded_operations(): произошла ошибка в процессе выполнения, '.PHP_EOL.$e->getMessage());
+		}
+
 	} else {
 		if (WEBP_DEBUGMODE){
 			writeLog('do_additional_hardcoded_operations(): функции didom_hardcoded_ops() не существует. Выход...');
