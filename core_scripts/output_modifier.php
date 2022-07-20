@@ -1740,8 +1740,12 @@ function do_additional_hardcoded_operations(&$document, &$params){
 		
 		try {
 			$didom_hardcoded_result = didom_hardcoded_ops($document, $params);
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
 			writeLog('do_additional_hardcoded_operations(): произошла ошибка в процессе выполнения, '.PHP_EOL.$e->getMessage());
+		}
+
+		if (is_null($didom_hardcoded_result)){
+			$didom_hardcoded_result = false;
 		}
 
 	} else {
