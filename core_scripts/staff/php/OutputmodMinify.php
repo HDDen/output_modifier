@@ -75,7 +75,7 @@ Class OutputmodMinify
                 '#(&nbsp;)&nbsp;(?![<\s])#', // clean up ...
                 '#(?<=\>)(&nbsp;)(?=\<)#', // --ibid
                 // Remove HTML comment(s) except IE comment(s)
-                '#\s*<!--(?!\[if\s).*?-->\s*|(?<!\>)\n+(?=\<[^!])#s'
+                '#\s*<!--(?!(\[if\s)|(noindex)|(\/noindex)).*?-->\s*|(?<!\>)\n+(?=\<[^!])#s', //'#\s*<!--(?!\[if\s).*?-->\s*|(?<!\>)\n+(?=\<[^!])#s' - noindex fix
             ),
             array(
                 '<$1$2</$1>',
