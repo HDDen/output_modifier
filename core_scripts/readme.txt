@@ -23,6 +23,7 @@ webp-on-demand.php : можно настроить использование ng
 
 Также можно конвертировать в webp или отдавать заранее подготовленный avif без прибегания к парсеру, напрямую через апач (сначала синхронизируйте настройки путей в default._settings.php и здесь в "ENV=WEBP_CUSTOM_PATH:", "ENV=AVIF_CUSTOM_PATH:" и "ENV=OUTPUT_MODIFIER_PATH:") :
 
+<IfModule mod_rewrite.c>
 RewriteEngine On
 ############################################################################
 #### Set processor path                                                 ####
@@ -74,6 +75,7 @@ RewriteCond %{HTTP_ACCEPT} image/webp [NC,OR]
 RewriteCond %{HTTP_USER_AGENT} Chrome [OR]
 RewriteCond %{HTTP_USER_AGENT} "Google Page Speed Insights"
 RewriteRule ^(.*)\.(jpe?g|png)$ %{ENV:OUTPUT_MODIFIER_PATH}/core_scripts/webp-on-demand.php [NC,L]
+</IfModule>
 
 
 Пример с nginx:
