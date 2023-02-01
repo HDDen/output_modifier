@@ -94,23 +94,48 @@ class Options
     /**
      * Get the value of an option in the collection - by id.
      *
+     * @deprecated  Use getOptionValue() instead
      * @param  string  $id      Id of the option to get
      * @throws  OptionNotFoundException  if the option is not in the collection
      * @return mixed  The value of the option
      */
     public function getOption($id)
     {
+        return $this->getOptionValue($id);
+    }
+
+    /**
+     * Get the Option in the collection by id.
+     *
+     * @param  string  $id      Id of the option to get
+     * @throws  OptionNotFoundException  if the option is not in the collection
+     * @return mixed  The value of the option
+     */
+    public function getOptionById($id)
+    {
         if (!isset($this->options[$id])) {
             throw new OptionNotFoundException(
                 'There is no option called "' . $id . '" in the collection.'
             );
         }
-        $option = $this->options[$id];
+        return $this->options[$id];
+    }
+
+    /**
+     * Get the value of an option in the collection - by id.
+     *
+     * @param  string  $id      Id of the option to get
+     * @throws  OptionNotFoundException  if the option is not in the collection
+     * @return mixed  The value of the option
+     */
+    public function getOptionValue($id)
+    {
+        $option = $this->getOptionById($id);
         return $option->getValue();
     }
 
     /**
-     * Return map of option objects.
+     * Return map of Option objects.
      *
      * @return array  map of option objects
      */
@@ -120,7 +145,7 @@ class Options
     }
 
     /**
-     * Return flat associative array of options.
+     * Return flat associative array of options (simple objects).
      *
      * @return array  associative array of options
      */
@@ -141,5 +166,44 @@ class Options
         foreach ($this->options as $id => $option) {
             $option->check();
         }
+    }
+
+    /**
+     * Set help texts on multiple options
+     *
+     * @param  array  $helpTexts      Hash of helptexts indexed by option id
+     */
+    public function setHelpTexts($helpTexts)
+    {
+        foreach ($this->options as $option) {
+            if (array_key_exists($option->getId(), $helpTexts)) {
+                $option->setHelpText($helpTexts[$option->getId()]);
+            }
+        }
+    }
+
+    /**
+     * Set ui definitions on multiple options
+     *
+     * @param  array  $uis      Hash of ui definitions indexed by option id
+     */
+    public function setUI($uis)
+    {
+        foreach ($this->options as $option) {
+            if (array_key_exists($option->getId(), $uis)) {
+                $option->setUI($uis[$option->getId()]);
+            }
+        }
+    }
+
+    public function getDefinitions($deprecatedToo = false)
+    {
+        $defs = [];
+        foreach ($this->options as $option) {
+            if ($deprecatedToo || !($option->isDeprecated())) {
+                $defs[] = $option->getDefinition();
+            }
+        }
+        return $defs;
     }
 }

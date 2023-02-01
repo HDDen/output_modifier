@@ -11,6 +11,7 @@ use WebPConvert\Convert\Exceptions\ConversionFailed\ConverterNotOperational\Inva
 use WebPConvert\Convert\Exceptions\ConversionFailed\ConverterNotOperational\SystemRequirementsNotMetException;
 use WebPConvert\Options\BooleanOption;
 use WebPConvert\Options\SensitiveStringOption;
+use WebPConvert\Options\OptionFactory;
 
 /**
  * Convert images to webp using ewww cloud service.
@@ -24,8 +25,38 @@ class Ewww extends AbstractConverter
     use CloudConverterTrait;
     use CurlTrait;
 
-    /** @var array  Array of invalid or exceeded api keys discovered during conversions (during the request)  */
+    /** @var array|null  Array of invalid or exceeded api keys discovered during conversions (during the request)  */
     public static $nonFunctionalApiKeysDiscoveredDuringConversion;
+
+    public function getUniqueOptions($imageType)
+    {
+        return OptionFactory::createOptions([
+            ['api-key', 'string', [
+                'title' => 'Ewww API key',
+                'description' => 'ewww API key. ' .
+                    'If you choose "auto", webp-convert will ' .
+                    'convert to both lossy and lossless and pick the smallest result',
+                'default' => '',
+                'sensitive' => true,
+                'ui' => [
+                    'component' => 'password',
+                ]
+            ]],
+            ['check-key-status-before-converting', 'boolean', [
+                'title' => 'Check key status before converting',
+                'description' =>
+                    'If enabled, the api key will be validated (relative inexpensive) before trying ' .
+                    'to convert. For automatic conversions, you should enable it. Otherwise you run the ' .
+                    'risk that the same files will be uploaded to ewww cloud service over and over again, ' .
+                    'in case the key has expired. For manually triggered conversions, you can safely disable ' .
+                    'the option.',
+                'default' => true,
+                'ui' => [
+                    'component' => 'checkbox',
+                ]
+            ]],
+        ]);
+    }
 
     protected function getUnsupportedDefaultOptions()
     {
@@ -37,19 +68,9 @@ class Ewww extends AbstractConverter
             'method',
             'near-lossless',
             'preset',
+            'sharp-yuv',
             'size-in-percentage',
-            'use-nice'
         ];
-    }
-
-    protected function createOptions()
-    {
-        parent::createOptions();
-
-        $this->options2->addOptions(
-            new SensitiveStringOption('api-key', ''),
-            new BooleanOption('check-key-status-before-converting', true)
-        );
     }
 
     /**
@@ -325,7 +346,11 @@ class Ewww extends AbstractConverter
             if ($responseObj->error == 'invalid') {
                 return 'invalid';
             } else {
-                throw new \Exception('Ewww returned unexpected error: ' . $response);
+                if ($responseObj->error == 'bye invalid') {
+                    return 'invalid';
+                } else {
+                    throw new \Exception('Ewww returned unexpected error: ' . $response);
+                }
             }
         }
         if (!isset($responseObj->status)) {

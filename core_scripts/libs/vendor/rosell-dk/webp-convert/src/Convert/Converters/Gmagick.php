@@ -24,9 +24,7 @@ class Gmagick extends AbstractConverter
     {
         return [
             'near-lossless',
-            'preset',
             'size-in-percentage',
-            'use-nice'
         ];
     }
 
@@ -91,6 +89,9 @@ class Gmagick extends AbstractConverter
     protected function doActualConvert()
     {
 
+        // PS: graphicsmagick options are documented here: (search for "webp:")
+        // http://www.graphicsmagick.org/GraphicsMagick.html
+
         $options = $this->options;
 
         try {
@@ -105,17 +106,38 @@ class Gmagick extends AbstractConverter
 
         $im->setimageformat('WEBP');
 
-        // Not completely sure if setimageoption() has always been there, so lets check first. #169
+        // setimageoption() has not always been there, so check first. #169
         if (method_exists($im, 'setimageoption')) {
             // Finally cracked setting webp options.
             // See #167
             // - and https://stackoverflow.com/questions/47294962/how-to-write-lossless-webp-files-with-perlmagick
+
+            if (!is_null($options['preset'])) {
+                if ($options['preset'] != 'none') {
+                    $imageHint = $options['preset'];
+                    switch ($imageHint) {
+                        case 'drawing':
+                        case 'icon':
+                        case 'text':
+                            $imageHint = 'graph';
+                            $this->logLn(
+                                'The "preset" value was mapped to "graph" because gmagick does not support "drawing",' .
+                                ' "icon" and "text", but grouped these into one option: "graph".'
+                            );
+                    }
+                    $im->setimageoption('webp', 'image-hint', $imageHint);
+                }
+            }
             $im->setimageoption('webp', 'method', $options['method']);
             $im->setimageoption('webp', 'lossless', $options['encoding'] == 'lossless' ? 'true' : 'false');
             $im->setimageoption('webp', 'alpha-quality', $options['alpha-quality']);
 
             if ($options['auto-filter'] === true) {
                 $im->setimageoption('webp', 'auto-filter', 'true');
+            }
+
+            if ($options['sharp-yuv'] === true) {
+                $im->setimageoption('webp', 'use-sharp-yuv', 'true');
             }
         }
 

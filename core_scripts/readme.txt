@@ -48,7 +48,7 @@ RewriteCond %{REQUEST_FILENAME} (.*)\.(jpe?g|png)$
 RewriteCond %{HTTP_REFERER} !admin [NC]
 RewriteCond %{HTTP_ACCEPT} image/avif
 RewriteCond %{DOCUMENT_ROOT}%{ENV:AVIF_CUSTOM_PATH}%{REQUEST_URI}.avif -f
-RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{ENV:AVIF_CUSTOM_PATH}/$1.$2.avif [NC,T=image/avif,L]
+RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{ENV:AVIF_CUSTOM_PATH}/$1.$2.avif [NC,T=image/avif,L,ENV=AVIF_IMG_TYPE:1]
 # if avif does not exists, check webp
 RewriteCond %{REQUEST_FILENAME} (.*)\.(jpe?g|png)$
 #RewriteCond %{HTTP_COOKIE} !^.*webpactive=false.*$ [NC]
@@ -58,7 +58,9 @@ RewriteCond %{HTTP_COOKIE} ^.*webpactive=true.*$ [NC]
 RewriteCond %{HTTP_ACCEPT} !image/avif [OR]
 RewriteCond %{DOCUMENT_ROOT}%{ENV:AVIF_CUSTOM_PATH}%{REQUEST_URI}.avif !-f
 RewriteCond %{DOCUMENT_ROOT}%{ENV:WEBP_CUSTOM_PATH}%{REQUEST_URI}.webp -f
-RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{ENV:WEBP_CUSTOM_PATH}/$1.$2.webp [NC,T=image/webp,L]
+RewriteRule ^\/?(.*)\.(jpe?g|png)$ %{ENV:WEBP_CUSTOM_PATH}/$1.$2.webp [NC,T=image/webp,L,ENV=WEBP_IMG_TYPE:1]
+Header set Content-Type "image/avif" env=AVIF_IMG_TYPE
+Header set Content-Type "image/webp" env=WEBP_IMG_TYPE
 ############################################################################
 #### Redirect images to webp-on-demand.php (if browser supports webp)   ####
 ############################################################################

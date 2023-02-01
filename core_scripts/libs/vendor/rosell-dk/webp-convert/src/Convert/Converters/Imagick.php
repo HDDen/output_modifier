@@ -24,10 +24,7 @@ class Imagick extends AbstractConverter
     protected function getUnsupportedDefaultOptions()
     {
         return [
-            'near-lossless',
-            'preset',
             'size-in-percentage',
-            'use-nice'
         ];
     }
 
@@ -106,20 +103,71 @@ class Imagick extends AbstractConverter
 
         // This might throw - we let it!
         $im = new \Imagick($this->source);
-
         //$im = new \Imagick();
         //$im->pingImage($this->source);
         //$im->readImage($this->source);
 
+        $version = \Imagick::getVersion();
+        $this->logLn('ImageMagic API version (full): ' . $version['versionString']);
+
+        preg_match('#\d+\.\d+\.\d+[\d\.\-]+#', $version['versionString'], $matches);
+        $versionNumber = (isset($matches[0]) ? $matches[0] : 'unknown');
+        $this->logLn('ImageMagic API version (just the number): ' . $versionNumber);
+
+        // Note: good enough for info, but not entirely reliable - see #304
+        $extVersion = (defined('\Imagick::IMAGICK_EXTVER') ? \Imagick::IMAGICK_EXTVER : phpversion('imagick'));
+        $this->logLn('Imagic extension version: ' . $extVersion);
+
         $im->setImageFormat('WEBP');
+
+        if (!is_null($options['preset'])) {
+            if ($options['preset'] != 'none') {
+                $imageHint = $options['preset'];
+                switch ($imageHint) {
+                    case 'drawing':
+                    case 'icon':
+                    case 'text':
+                        $imageHint = 'graph';
+                        $this->logLn(
+                            'The "preset" value was mapped to "graph" because imagick does not support "drawing",' .
+                            ' "icon" and "text", but grouped these into one option: "graph".'
+                        );
+                }
+                $im->setOption('webp:image-hint', $imageHint);
+            }
+        }
 
         $im->setOption('webp:method', $options['method']);
         $im->setOption('webp:lossless', $options['encoding'] == 'lossless' ? 'true' : 'false');
         $im->setOption('webp:low-memory', $options['low-memory'] ? 'true' : 'false');
         $im->setOption('webp:alpha-quality', $options['alpha-quality']);
 
+        if ($options['near-lossless'] != 100) {
+            if (version_compare($versionNumber, '7.0.10-54', '>=')) {
+                $im->setOption('webp:near-lossless', $options['near-lossless']);
+            } else {
+                $this->logLn(
+                    'Note: near-lossless is not supported in your version of ImageMagick. ' .
+                        'ImageMagic >= 7.0.10-54 is required',
+                    'italic'
+                );
+            }
+        }
+
         if ($options['auto-filter'] === true) {
             $im->setOption('webp:auto-filter', 'true');
+        }
+
+        if ($options['sharp-yuv'] === true) {
+            if (version_compare($versionNumber, '7.0.8-26', '>=')) {
+                $im->setOption('webp:use-sharp-yuv', 'true');
+            } else {
+                $this->logLn(
+                    'Note: "sharp-yuv" option is not supported in your version of ImageMagick. ' .
+                      'ImageMagic >= 7.0.8-26 is required',
+                    'italic'
+                );
+            }
         }
 
         if ($options['metadata'] == 'none') {

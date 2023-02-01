@@ -7,6 +7,7 @@ use WebPConvert\Convert\Converters\ConverterTraits\EncodingAutoTrait;
 use WebPConvert\Convert\Exceptions\ConversionFailedException;
 use WebPConvert\Convert\Exceptions\ConversionFailed\ConverterNotOperational\SystemRequirementsNotMetException;
 use WebPConvert\Options\BooleanOption;
+use WebPConvert\Options\IntegerOption;
 
 //require '/home/rosell/.composer/vendor/autoload.php';
 
@@ -24,18 +25,23 @@ class Vips extends AbstractConverter
     protected function getUnsupportedDefaultOptions()
     {
         return [
+            'auto-filter',
             'size-in-percentage',
-            'use-nice'
         ];
     }
 
-    protected function createOptions()
+    /**
+    *  Get the options unique for this converter
+     *
+     *  @return  array  Array of options
+     */
+    public function getUniqueOptions($imageType)
     {
-        parent::createOptions();
-
-        $this->options2->addOptions(
-            new BooleanOption('smart-subsample', false)
-        );
+        $ssOption = new BooleanOption('smart-subsample', false);
+        $ssOption->markDeprecated();
+        return [
+            $ssOption
+        ];
     }
 
     /**
@@ -56,8 +62,31 @@ class Vips extends AbstractConverter
             );
         }
 
-        // TODO: Should we also test if webp is available? (It seems not to be neccessary - it seems
-        // that webp be well intergrated part of vips)
+        if (!function_exists('vips_call')) {
+            throw new SystemRequirementsNotMetException(
+                'Vips extension seems to be installed, however something is not right: ' .
+                'the function "vips_call" is not available.'
+            );
+        }
+
+        if (!function_exists('vips_error_buffer')) {
+            throw new SystemRequirementsNotMetException(
+                'Vips extension seems to be installed, however something is not right: ' .
+                'the function "vips_error_buffer" is not available.'
+            );
+        }
+
+
+        vips_error_buffer(); // clear error buffer
+        $result = vips_call('webpsave', null);
+        if ($result === -1) {
+            $message = vips_error_buffer();
+            if (strpos($message, 'VipsOperation: class "webpsave" not found') === 0) {
+                throw new SystemRequirementsNotMetException(
+                    'Vips has not been compiled with webp support.'
+                );
+            }
+        }
     }
 
     /**
@@ -120,12 +149,11 @@ class Vips extends AbstractConverter
     private function createParamsForVipsWebPSave()
     {
         // webpsave options are described here:
-        // v 8.8.0:  https://libvips.github.io/libvips/API/current/VipsForeignSave.html#vips-webpsave
-        // v ?.?.?:  https://jcupitt.github.io/libvips/API/current/VipsForeignSave.html#vips-webpsave
+        // https://libvips.github.io/libvips/API/current/VipsForeignSave.html#vips-webpsave
         // near_lossless option is described here: https://github.com/libvips/libvips/pull/430
 
-        // Note that "method" is currently not supported (27 may 2019)
-
+        // NOTE: When a new option becomes available, we MUST remember to add
+        //       it to the array of possibly unsupported options in webpsave() !
         $options = [
             "Q" => $this->getCalculatedQuality(),
             'lossless' => ($this->options['encoding'] == 'lossless'),
@@ -135,8 +163,18 @@ class Vips extends AbstractConverter
         // Only set the following options if they differ from the default of vipslib
         // This ensures we do not get warning if that property isn't supported
         if ($this->options['smart-subsample'] !== false) {
+            // PS: The smart-subsample option is now deprecated, as it turned out
+            // it was corresponding to the "sharp-yuv" option (see #280)
             $options['smart_subsample'] = $this->options['smart-subsample'];
+            $this->logLn(
+                '*Note: the "smart-subsample" option is now deprecated. It turned out it corresponded to ' .
+                'the general option "sharp-yuv". You should use "sharp-yuv" instead.*'
+            );
         }
+        if ($this->options['sharp-yuv'] !== false) {
+            $options['smart_subsample'] = $this->options['sharp-yuv'];
+        }
+
         if ($this->options['alpha-quality'] !== 100) {
             $options['alpha_q'] = $this->options['alpha-quality'];
         }
@@ -162,14 +200,17 @@ class Vips extends AbstractConverter
                 $options['Q'] = $this->options['near-lossless'];
             }
         }
+        if ($this->options['method'] !== 4) {
+            $options['reduction_effort'] = $this->options['method'];
+        }
 
         return $options;
     }
 
     /**
-     * Convert with vips extension.
+     * Save as webp, using vips extension.
      *
-     * Tries to create image resource and save it as webp using the calculated options.
+     * Tries to save image resource as webp, using the supplied options.
      * Vips fails when a parameter is not supported, but we detect this and unset that parameter and try again
      * (recursively call itself until there is no more of these kind of errors).
      *
@@ -178,6 +219,7 @@ class Vips extends AbstractConverter
      */
     private function webpsave($im, $options)
     {
+        /** @scrutinizer ignore-call */ vips_error_buffer(); // clear error buffer
         $result = /** @scrutinizer ignore-call */ vips_call('webpsave', $im, $this->destination, $options);
 
         //trigger_error('test-warning', E_USER_WARNING);
@@ -190,16 +232,44 @@ class Vips extends AbstractConverter
             } elseif (preg_match("#(.*)\\sunsupported$#", $message, $matches)) {
                 // Actually, I am not quite sure if this ever happens.
                 // I got a "near_lossless unsupported" error message in a build, but perhaps it rather a warning
-                if (in_array($matches[1], ['lossless', 'alpha_q', 'near_lossless', 'smart_subsample'])) {
+                if (in_array($matches[1], [
+                    'lossless',
+                    'alpha_q',
+                    'near_lossless',
+                    'smart_subsample',
+                    'reduction_effort',
+                    'preset'
+                ])) {
                     $nameOfPropertyNotFound = $matches[1];
                 }
             }
 
             if ($nameOfPropertyNotFound != '') {
-                $this->logLn(
-                    'Your version of vipslib does not support the "' . $nameOfPropertyNotFound . '" property. ' .
-                    'The option is ignored.'
-                );
+                $msg = 'Note: Your version of vipslib does not support the "' .
+                    $nameOfPropertyNotFound . '" property';
+
+                switch ($nameOfPropertyNotFound) {
+                    case 'alpha_q':
+                        $msg .= ' (It was introduced in vips 8.4)';
+                        break;
+                    case 'near_lossless':
+                        $msg .= ' (It was introduced in vips 8.4)';
+                        break;
+                    case 'smart_subsample':
+                        $msg .= ' (its the vips equalent to the "sharp-yuv" option. It was introduced in vips 8.4)';
+                        break;
+                    case 'reduction_effort':
+                        $msg .= ' (its the vips equalent to the "method" option. It was introduced in vips 8.8.0)';
+                        break;
+                    case 'preset':
+                        $msg .= ' (It was introduced in vips 8.4)';
+                        break;
+                }
+                $msg .= '. The option is ignored.';
+
+
+                $this->logLn($msg, 'bold');
+
                 unset($options[$nameOfPropertyNotFound]);
                 $this->webpsave($im, $options);
             } else {
@@ -209,11 +279,11 @@ class Vips extends AbstractConverter
     }
 
     /**
-     * Convert with vips extension.
+     * Convert, using vips extension.
      *
      * Tries to create image resource and save it as webp using the calculated options.
-     * Vips fails when a parameter is not supported, but we detect this and unset that parameter and try again
-     * (repeat until success).
+     * PS: The Vips "webpsave" call fails when a parameter is not supported, but our webpsave() method
+     * detect this and unset that parameter and try again (repeat until success).
      *
      * @throws  ConversionFailedException  if conversion fails.
      */

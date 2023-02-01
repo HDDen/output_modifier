@@ -11,9 +11,22 @@ class ComposerStaticInit9fecccd0761f578ec60d112322d331c5
         array (
             'WebPConvert\\' => 12,
         ),
+        'L' => 
+        array (
+            'LocateBinaries\\' => 15,
+        ),
         'I' => 
         array (
+            'ImageMimeTypeSniffer\\' => 21,
             'ImageMimeTypeGuesser\\' => 21,
+        ),
+        'F' => 
+        array (
+            'FileUtil\\' => 9,
+        ),
+        'E' => 
+        array (
+            'ExecWithFallback\\' => 17,
         ),
         'D' => 
         array (
@@ -26,9 +39,25 @@ class ComposerStaticInit9fecccd0761f578ec60d112322d331c5
         array (
             0 => __DIR__ . '/..' . '/rosell-dk/webp-convert/src',
         ),
+        'LocateBinaries\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/rosell-dk/locate-binaries/src',
+        ),
+        'ImageMimeTypeSniffer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/rosell-dk/image-mime-type-sniffer/src',
+        ),
         'ImageMimeTypeGuesser\\' => 
         array (
             0 => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src',
+        ),
+        'FileUtil\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/rosell-dk/file-util/src',
+        ),
+        'ExecWithFallback\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src',
         ),
         'DiDom\\' => 
         array (
@@ -48,15 +77,28 @@ class ComposerStaticInit9fecccd0761f578ec60d112322d331c5
         'DiDom\\Node' => __DIR__ . '/..' . '/imangazaliev/didom/src/DiDom/Node.php',
         'DiDom\\Query' => __DIR__ . '/..' . '/imangazaliev/didom/src/DiDom/Query.php',
         'DiDom\\StyleAttribute' => __DIR__ . '/..' . '/imangazaliev/didom/src/DiDom/StyleAttribute.php',
+        'ExecWithFallback\\Availability' => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src/Availability.php',
+        'ExecWithFallback\\ExecWithFallback' => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src/ExecWithFallback.php',
+        'ExecWithFallback\\ExecWithFallbackNoMercy' => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src/ExecWithFallbackNoMercy.php',
+        'ExecWithFallback\\POpen' => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src/POpen.php',
+        'ExecWithFallback\\Passthru' => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src/Passthru.php',
+        'ExecWithFallback\\ProcOpen' => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src/ProcOpen.php',
+        'ExecWithFallback\\ShellExec' => __DIR__ . '/..' . '/rosell-dk/exec-with-fallback/src/ShellExec.php',
+        'FileUtil\\FileExists' => __DIR__ . '/..' . '/rosell-dk/file-util/src/FileExists.php',
+        'FileUtil\\FileExistsUsingExec' => __DIR__ . '/..' . '/rosell-dk/file-util/src/FileExistsUsingExec.php',
+        'FileUtil\\PathValidator' => __DIR__ . '/..' . '/rosell-dk/file-util/src/PathValidator.php',
         'ImageMimeTypeGuesser\\Detectors\\AbstractDetector' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/AbstractDetector.php',
         'ImageMimeTypeGuesser\\Detectors\\ExifImageType' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/ExifImageType.php',
         'ImageMimeTypeGuesser\\Detectors\\FInfo' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/FInfo.php',
         'ImageMimeTypeGuesser\\Detectors\\GetImageSize' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/GetImageSize.php',
         'ImageMimeTypeGuesser\\Detectors\\MimeContentType' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/MimeContentType.php',
-        'ImageMimeTypeGuesser\\Detectors\\SniffFirstFourBytes' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/SniffFirstFourBytes.php',
+        'ImageMimeTypeGuesser\\Detectors\\SignatureSniffer' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/SignatureSniffer.php',
         'ImageMimeTypeGuesser\\Detectors\\Stack' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/Detectors/Stack.php',
         'ImageMimeTypeGuesser\\GuessFromExtension' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/GuessFromExtension.php',
         'ImageMimeTypeGuesser\\ImageMimeTypeGuesser' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/ImageMimeTypeGuesser.php',
+        'ImageMimeTypeGuesser\\MimeMap' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-guesser/src/MimeMap.php',
+        'ImageMimeTypeSniffer\\ImageMimeTypeSniffer' => __DIR__ . '/..' . '/rosell-dk/image-mime-type-sniffer/src/ImageMimeTypeSniffer.php',
+        'LocateBinaries\\LocateBinaries' => __DIR__ . '/..' . '/rosell-dk/locate-binaries/src/LocateBinaries.php',
         'WebPConvert\\Convert\\ConverterFactory' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Convert/ConverterFactory.php',
         'WebPConvert\\Convert\\Converters\\AbstractConverter' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Convert/Converters/AbstractConverter.php',
         'WebPConvert\\Convert\\Converters\\BaseTraits\\AutoQualityTrait' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Convert/Converters/BaseTraits/AutoQualityTrait.php',
@@ -99,8 +141,6 @@ class ComposerStaticInit9fecccd0761f578ec60d112322d331c5
         'WebPConvert\\Exceptions\\InvalidInput\\InvalidImageTypeException' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Exceptions/InvalidInput/InvalidImageTypeException.php',
         'WebPConvert\\Exceptions\\InvalidInput\\TargetNotFoundException' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Exceptions/InvalidInput/TargetNotFoundException.php',
         'WebPConvert\\Exceptions\\WebPConvertException' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Exceptions/WebPConvertException.php',
-        'WebPConvert\\Helpers\\BinaryDiscovery' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Helpers/BinaryDiscovery.php',
-        'WebPConvert\\Helpers\\FileExists' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Helpers/FileExists.php',
         'WebPConvert\\Helpers\\InputValidator' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Helpers/InputValidator.php',
         'WebPConvert\\Helpers\\MimeType' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Helpers/MimeType.php',
         'WebPConvert\\Helpers\\PathChecker' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Helpers/PathChecker.php',
@@ -118,6 +158,7 @@ class ComposerStaticInit9fecccd0761f578ec60d112322d331c5
         'WebPConvert\\Options\\IntegerOrNullOption' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Options/IntegerOrNullOption.php',
         'WebPConvert\\Options\\MetadataOption' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Options/MetadataOption.php',
         'WebPConvert\\Options\\Option' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Options/Option.php',
+        'WebPConvert\\Options\\OptionFactory' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Options/OptionFactory.php',
         'WebPConvert\\Options\\Options' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Options/Options.php',
         'WebPConvert\\Options\\QualityOption' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Options/QualityOption.php',
         'WebPConvert\\Options\\SensitiveArrayOption' => __DIR__ . '/..' . '/rosell-dk/webp-convert/src/Options/SensitiveArrayOption.php',
