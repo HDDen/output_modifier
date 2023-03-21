@@ -1036,7 +1036,10 @@ function process_lazy(&$document, &$params = false){
 		$module_time = microtime(true);
 	}
 
-	if (isset($params['lazyload']) && (!empty($params['lazyload']))){
+	// проверка на отключение по get-параметру. Установит 
+	$skip_lazy_global = ignore_lazy_byGet($params);
+
+	if (isset($params['lazyload']) && (!empty($params['lazyload'])) && !$skip_lazy_global){
 		$process_on = array(); // массив общий
 
 		// "Чёрный лист" - исключающие селекторы
@@ -1365,6 +1368,31 @@ function unlazy(&$elem, &$params = false){
 	if ($expand_area_attr && $elem->hasAttribute($expand_area_attr)){
 		$elem->removeAttribute($expand_area_attr);
 	}
+}
+
+function ignore_lazy_byGet(&$params){
+	$result = false;
+
+	if (!$_GET) return $result;
+
+	if (!$params) return $result;
+
+	if (!isset($params['lazy_disable_get_parameters'])) return $result;
+
+	if (!($params['lazy_disable_get_parameters'])){
+		return $result;
+	} else {
+		$get_array = $params['lazy_disable_get_parameters'];
+		foreach ($get_array as $ignore_param){
+			$ignore_param = trim($ignore_param);
+			if (array_key_exists($ignore_param, $_GET)){
+				$result = true;
+				break;
+			}
+		}
+	}
+
+	return $result;
 }
 
 function generate_webp($elem, $filter_by_specific_extensions = false, $custom_path = false){

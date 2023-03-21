@@ -103,6 +103,7 @@ $default_params = array(
     'fallback_alt' => false, // add empty 'alt'-attribute if doesnt exists
     'ignore_imgs' => false, // false or selectors
     'minify_html' => false, // minifier. Very heavy process, recommended to use only with caching!
+    'lazy_disable_get_parameters' => false, // false or array('amp','anyparam','some_again')
 );
 
 // настройки конвертеров
