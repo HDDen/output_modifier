@@ -508,7 +508,11 @@ function add_img_sizes(&$elem, $mode){
 	// получаем данные об изображении
 	$sizes = false;
 	if ($img_server_abspath){
-		$sizes = getimagesize($img_server_abspath);
+		$sizes_temporary = @getimagesize($img_server_abspath);
+		if ($sizes_temporary){
+			$sizes = $sizes_temporary;
+			unset($sizes_temporary);
+		}
 	} else {
 		if (WEBP_DEBUGMODE){
 			writeLog('add_img_sizes(): Не смогли получить серверный путь до картинки.'.PHP_EOL.'$src = '.$src.PHP_EOL.' Выход.');
