@@ -1937,7 +1937,7 @@ function additionalImgOperations(&$document, &$params = false){
 
 	foreach ($imgs as $elem) {
 		// проверка на исключение по фильтру
-		if ($params['ignore_imgs']){
+		if (@$params['ignore_imgs']){
 			if ($elem->matches($params['ignore_imgs'])){
 				continue;
 			};
