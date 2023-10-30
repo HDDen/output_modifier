@@ -2091,12 +2091,12 @@ function modifyImagesWebp($output, $params = false){
 	}
 
 	// Воюем с кодировкой
-	if ($params['html_entity_decode']){
+	if (@$params['html_entity_decode']){
 		$moddedhtml = html_entity_decode($moddedhtml);
 	}
 
 	// Минификация
-	if ($params['minify_html']){
+	if (@$params['minify_html']){
 		if (WEBP_DEBUGMODE){
 			writeLog('Запускаем минификацию');
 			$minify_time = microtime(true);
