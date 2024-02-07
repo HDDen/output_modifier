@@ -23,6 +23,10 @@ if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCAT
 	define('WEBPPROJECT', __DIR__);
 }
 
+// url к обработчику
+if (!defined('WEBPPROJECT_URL')){
+	define('WEBPPROJECT_URL', str_replace($_SERVER['DOCUMENT_ROOT'], '', WEBPPROJECT));
+}
 
 // подключение библиотек
 require_once WEBPPROJECT.'/libs/vendor/autoload.php';
@@ -1098,7 +1102,8 @@ function process_lazyload_once(&$elem, &$params){
 	// процессинг ленивой загрузки для одного конкретного элемента
 	// универсальный для img и остальных
 	$tagname = $elem->tag;
-	$preloader = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='; // default
+	// $preloader = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='; // default
+	$preloader = WEBPPROJECT_URL . "/staff/img/dummy.svg"; // default
 	if (isset($params['lazyload'][$tagname]['inline_preloader_picture'])){
 		$preloader = $params['lazyload'][$tagname]['inline_preloader_picture'];
 	}
