@@ -2092,7 +2092,8 @@ function modifyImagesWebp($output, $params = false){
 
 	// Воюем с кодировкой
 	if (@$params['html_entity_decode']){
-		$moddedhtml = html_entity_decode($moddedhtml);
+		// $moddedhtml = html_entity_decode($moddedhtml);
+		$moddedhtml = preg_replace_callback("/(&#[0-9]+;)/", function($m) { return mb_convert_encoding($m[1], "UTF-8", "HTML-ENTITIES"); }, $moddedhtml);
 	}
 
 	// Минификация

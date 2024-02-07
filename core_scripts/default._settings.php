@@ -91,7 +91,7 @@ $default_params = array(
         'external' => false, // false/true for abspaths/subdomains
         'base_host' => false, // false or base domain like 'example.co.uk'
     ),
-    'html_entity_decode' => true, // process html_entity_decode() to result. Needed for Drupal
+    'html_entity_decode' => true, // process mb_convert_encoding() to result. Needed for Drupal
     'strip_html' => false, // return whole <html> document or only <body> inner
     'ignore_lazy' => false, // selectors for ignoring lazyload. In fact, these elems will be lazied, then unlazied :-/
     'add_chromelazy_img' => false, // (auto|lazy|eager) / false. add loading="lazy" attr to img

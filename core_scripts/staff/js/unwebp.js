@@ -19,6 +19,7 @@
 						if (imgAttrs[i] == 'src'){
 							var attr = imgs[k].getAttribute(imgAttrs[i]);
 							attr = attr.replace('.webp', '');
+							attr = attr.replace('/webp/', '/');
 							if (prefix){
 								attr = attr.replace(prefix, '');
 							}
@@ -38,6 +39,7 @@
 					for (var k = 0; k < els.length; k++){
 						var attr = els[k].getAttribute(bgAttrs[i]);
 						attr = attr.replace('.webp', '');
+						attr = attr.replace('/webp/', '/');
 						if (prefix){
 							attr = attr.replace(prefix, '');
 						}
