@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'a4fc4173e40070a530b9b549f97110a5a4eb7485',
+        'reference' => '8c620b64f690c47a281d5b9cc80e78a9e7ebca1d',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'a4fc4173e40070a530b9b549f97110a5a4eb7485',
+            'reference' => '8c620b64f690c47a281d5b9cc80e78a9e7ebca1d',
             'dev_requirement' => false,
         ),
         'imangazaliev/didom' => array(
