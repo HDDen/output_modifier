@@ -16,6 +16,20 @@ if (!defined('OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION')){
     define('OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION', $webp_core_fallback_location);
 }
 
+// Определяем путь до output_modifier.php от корня сайта. Используется, например, в логгере
+if (!defined('WEBPPROJECT')){
+    if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/output_modifier.php')){
+	    define('WEBPPROJECT', $_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION);
+    } else {
+        define('WEBPPROJECT', __DIR__);
+    }
+}
+
+// url к обработчику
+if (!defined('WEBPPROJECT_URL')){
+	define('WEBPPROJECT_URL', str_replace($_SERVER['DOCUMENT_ROOT'], '', WEBPPROJECT));
+}
+
 // дефолтные настройки модификатора
 $default_params = array(
     'webp' => array(

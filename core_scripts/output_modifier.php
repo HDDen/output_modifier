@@ -14,19 +14,27 @@ if (!isset($default_params)){
 }
 //
 
-define('HOMEDIR', get_homedir()); // ищем папку сайта ( /var/site.com ).
+if (!defined('HOMEDIR')){
+	define('HOMEDIR', get_homedir()); // ищем папку сайта ( /var/site.com ).
+}
 
+/************************************************************************************************************
+ * Fallback - only for old versions of script!!!
+ */
 // Определяем путь до output_modifier.php от корня сайта. Используется, например, в логгере
-if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/output_modifier.php')){
+if (!defined('WEBPPROJECT')){
+	if (file_exists($_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION.'/output_modifier.php')){
 	define('WEBPPROJECT', $_SERVER['DOCUMENT_ROOT'].'/'.OUTPUTMOD_WEBP_CORE_FALLBACK_LOCATION);
-} else {
-	define('WEBPPROJECT', __DIR__);
+	} else {
+		define('WEBPPROJECT', __DIR__);
+	}
 }
 
 // url к обработчику
 if (!defined('WEBPPROJECT_URL')){
 	define('WEBPPROJECT_URL', str_replace($_SERVER['DOCUMENT_ROOT'], '', WEBPPROJECT));
 }
+/************************************************************************************************************/
 
 // подключение библиотек
 require_once WEBPPROJECT.'/libs/vendor/autoload.php';
