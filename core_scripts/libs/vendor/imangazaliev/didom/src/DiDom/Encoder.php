@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace DiDom;
 
 class Encoder
@@ -12,10 +10,9 @@ class Encoder
      *
      * @return string
      */
-    public static function convertToHtmlEntities(string $string, string $encoding): string
+    public static function convertToHtmlEntities($string, $encoding)
     {
-        // handling HTML entities via mbstring is deprecated in PHP 8.2
-        if (function_exists('mb_convert_encoding') && PHP_VERSION_ID < 80200) {
+        if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, 'HTML-ENTITIES', $encoding);
         }
 
@@ -31,7 +28,7 @@ class Encoder
      *
      * @return string
      */
-    private static function htmlEncodingCallback(array $matches): string
+    private static function htmlEncodingCallback($matches)
     {
         $characterIndex = 1;
         $entities = '';

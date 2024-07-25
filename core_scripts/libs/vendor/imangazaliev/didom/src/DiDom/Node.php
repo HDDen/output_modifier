@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace DiDom;
 
 use DiDom\Exceptions\InvalidSelectorException;
@@ -41,7 +39,7 @@ abstract class Node
     public function prependChild($nodes)
     {
         if ($this->node->ownerDocument === null) {
-            throw new LogicException('Can not prepend a child to element without the owner document.');
+            throw new LogicException('Can not prepend a child to element without the owner document');
         }
 
         $returnArray = true;
@@ -80,7 +78,7 @@ abstract class Node
     public function appendChild($nodes)
     {
         if ($this->node->ownerDocument === null) {
-            throw new LogicException('Can not append a child to element without the owner document.');
+            throw new LogicException('Can not append a child to element without the owner document');
         }
 
         $returnArray = true;
@@ -101,7 +99,7 @@ abstract class Node
             }
 
             if ( ! $node instanceof DOMNode) {
-                throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
+                throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
             }
 
             $clonedNode = $node->cloneNode(true);
@@ -131,10 +129,10 @@ abstract class Node
      * @throws InvalidArgumentException if $node is not an instance of DOMNode or Element
      * @throws InvalidArgumentException if $referenceNode is not an instance of DOMNode or Element
      */
-    public function insertBefore($node, $referenceNode = null): self
+    public function insertBefore($node, $referenceNode = null)
     {
         if ($this->node->ownerDocument === null) {
-            throw new LogicException('Can not insert a child to an element without the owner document.');
+            throw new LogicException('Can not insert a child to an element without the owner document');
         }
 
         if ($node instanceof Node) {
@@ -142,7 +140,7 @@ abstract class Node
         }
 
         if ( ! $node instanceof DOMNode) {
-            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
+            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
         }
 
         if ($referenceNode !== null) {
@@ -151,7 +149,7 @@ abstract class Node
             }
 
             if ( ! $referenceNode instanceof DOMNode) {
-                throw new InvalidArgumentException(sprintf('Argument 2 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($referenceNode) ? get_class($referenceNode) : gettype($referenceNode))));
+                throw new InvalidArgumentException(sprintf('Argument 2 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($referenceNode) ? get_class($referenceNode) : gettype($referenceNode))));
             }
         }
 
@@ -179,7 +177,7 @@ abstract class Node
      * @throws InvalidArgumentException if $node is not an instance of DOMNode or Element
      * @throws InvalidArgumentException if $referenceNode is not an instance of DOMNode or Element
      */
-    public function insertAfter($node, $referenceNode = null): self
+    public function insertAfter($node, $referenceNode = null)
     {
         if ($referenceNode === null) {
             return $this->insertBefore($node);
@@ -190,7 +188,7 @@ abstract class Node
         }
 
         if ( ! $referenceNode instanceof DOMNode) {
-            throw new InvalidArgumentException(sprintf('Argument 2 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($referenceNode) ? get_class($referenceNode) : gettype($referenceNode))));
+            throw new InvalidArgumentException(sprintf('Argument 2 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($referenceNode) ? get_class($referenceNode) : gettype($referenceNode))));
         }
 
         return $this->insertBefore($node, $referenceNode->nextSibling);
@@ -207,14 +205,14 @@ abstract class Node
      * @throws InvalidArgumentException if $node is not an instance of DOMNode or Element
      * @throws InvalidArgumentException if $referenceNode is not an instance of DOMNode or Element
      */
-    public function insertSiblingBefore($node): self
+    public function insertSiblingBefore($node)
     {
         if ($this->node->ownerDocument === null) {
-            throw new LogicException('Can not insert a child to an element without the owner document.');
+            throw new LogicException('Can not insert a child to an element without the owner document');
         }
 
         if ($this->parent() === null) {
-            throw new LogicException('Can not insert a child to an element without the parent element.');
+            throw new LogicException('Can not insert a child to an element without the parent element');
         }
 
         if ($node instanceof Node) {
@@ -222,7 +220,7 @@ abstract class Node
         }
 
         if ( ! $node instanceof DOMNode) {
-            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
+            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
         }
 
         Errors::disable();
@@ -248,14 +246,14 @@ abstract class Node
      * @throws InvalidArgumentException if $node is not an instance of DOMNode or Element
      * @throws InvalidArgumentException if $referenceNode is not an instance of DOMNode or Element
      */
-    public function insertSiblingAfter($node): self
+    public function insertSiblingAfter($node)
     {
         if ($this->node->ownerDocument === null) {
-            throw new LogicException('Can not insert a child to an element without the owner document.');
+            throw new LogicException('Can not insert a child to an element without the owner document');
         }
 
         if ($this->parent() === null) {
-            throw new LogicException('Can not insert a child to an element without the parent element.');
+            throw new LogicException('Can not insert a child to an element without the parent element');
         }
 
         $nextSibling = $this->nextSibling();
@@ -276,7 +274,7 @@ abstract class Node
      *
      * @return bool
      */
-    public function has(string $expression, string $type = Query::TYPE_CSS): bool
+    public function has($expression, $type = Query::TYPE_CSS)
     {
         return $this->toDocument()->has($expression, $type);
     }
@@ -292,7 +290,7 @@ abstract class Node
      *
      * @throws InvalidSelectorException
      */
-    public function find(string $expression, string $type = Query::TYPE_CSS, bool $wrapElement = true): array
+    public function find($expression, $type = Query::TYPE_CSS, $wrapElement = true)
     {
         return $this->toDocument()->find($expression, $type, $wrapElement);
     }
@@ -309,12 +307,12 @@ abstract class Node
      * @throws LogicException if the current node has no owner document
      * @throws InvalidSelectorException
      */
-    public function findInDocument(string $expression, string $type = Query::TYPE_CSS, bool $wrapNode = true): array
+    public function findInDocument($expression, $type = Query::TYPE_CSS, $wrapNode = true)
     {
-        $ownerDocument = $this->ownerDocument();
+        $ownerDocument = $this->getDocument();
 
         if ($ownerDocument === null) {
-            throw new LogicException('Can not search in context without the owner document.');
+            throw new LogicException('Can not search in context without the owner document');
         }
 
         return $ownerDocument->find($expression, $type, $wrapNode, $this->node);
@@ -331,7 +329,7 @@ abstract class Node
      *
      * @throws InvalidSelectorException
      */
-    public function first(string $expression, string $type = Query::TYPE_CSS, bool $wrapNode = true)
+    public function first($expression, $type = Query::TYPE_CSS, $wrapNode = true)
     {
         return $this->toDocument()->first($expression, $type, $wrapNode);
     }
@@ -347,12 +345,12 @@ abstract class Node
      *
      * @throws InvalidSelectorException
      */
-    public function firstInDocument(string $expression, string $type = Query::TYPE_CSS, bool $wrapNode = true)
+    public function firstInDocument($expression, $type = Query::TYPE_CSS, $wrapNode = true)
     {
-        $ownerDocument = $this->ownerDocument();
+        $ownerDocument = $this->getDocument();
 
         if ($ownerDocument === null) {
-            throw new LogicException('Can not search in context without the owner document.');
+            throw new LogicException('Can not search in context without the owner document');
         }
 
         return $ownerDocument->first($expression, $type, $wrapNode, $this->node);
@@ -368,7 +366,7 @@ abstract class Node
      *
      * @throws InvalidSelectorException
      */
-    public function xpath(string $expression, bool $wrapNode = true): array
+    public function xpath($expression, $wrapNode = true)
     {
         return $this->find($expression, Query::TYPE_XPATH, $wrapNode);
     }
@@ -383,7 +381,7 @@ abstract class Node
      *
      * @throws InvalidSelectorException
      */
-    public function count(string $expression, string $type = Query::TYPE_CSS): int
+    public function count($expression, $type = Query::TYPE_CSS)
     {
         return $this->toDocument()->count($expression, $type);
     }
@@ -393,7 +391,7 @@ abstract class Node
      *
      * @return string
      */
-    public function html(): string
+    public function html()
     {
         return $this->toDocument()->html();
     }
@@ -403,7 +401,7 @@ abstract class Node
      *
      * @return string
      */
-    public function outerHtml(): string
+    public function outerHtml()
     {
         $document = new DOMDocument();
 
@@ -419,7 +417,7 @@ abstract class Node
      *
      * @return string
      */
-    public function innerHtml(string $delimiter = ''): string
+    public function innerHtml($delimiter = '')
     {
         $innerHtml = [];
 
@@ -437,7 +435,7 @@ abstract class Node
      *
      * @return string
      */
-    public function innerXml(string $delimiter = ''): string
+    public function innerXml($delimiter = '')
     {
         $innerXml = [];
 
@@ -458,45 +456,31 @@ abstract class Node
      * @throws InvalidArgumentException if passed argument is not a string
      * @throws InvalidSelectorException
      */
-    public function setInnerHtml(string $html): self
+    public function setInnerHtml($html)
     {
-        return $this->setContent($html, Document::TYPE_HTML);
-    }
-
-    /**
-     * Sets inner HTML.
-     *
-     * @param string $xml
-     *
-     * @return static
-     *
-     * @throws InvalidArgumentException if passed argument is not a string
-     * @throws InvalidSelectorException
-     */
-    public function setInnerXml(string $xml): self
-    {
-        return $this->setContent($xml, Document::TYPE_XML);
-    }
-
-    protected function setContent(string $content, string $type): self
-    {
-        $this->removeChildren();
-
-        Errors::disable();
-
-        $encoding = $this->ownerDocument()->getEncoding() ?? 'UTF-8';
-
-        $document = new Document("<didom-fragment>$content</didom-fragment>", false, $encoding, $type);
-
-        $fragment = $document->first('didom-fragment')->getNode();
-
-        foreach ($fragment->childNodes as $node) {
-            $newNode = $this->node->ownerDocument->importNode($node, true);
-
-            $this->node->appendChild($newNode);
+        if ( ! is_string($html)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, (is_object($html) ? get_class($html) : gettype($html))));
         }
 
-        Errors::restore();
+        $this->removeChildren();
+
+        if ($html !== '') {
+            Errors::disable();
+
+            $html = "<htmlfragment>$html</htmlfragment>";
+
+            $document = new Document($html);
+
+            $fragment = $document->first('htmlfragment')->getNode();
+
+            foreach ($fragment->childNodes as $node) {
+                $newNode = $this->node->ownerDocument->importNode($node, true);
+
+                $this->node->appendChild($newNode);
+            }
+
+            Errors::restore();
+        }
 
         return $this;
     }
@@ -508,7 +492,7 @@ abstract class Node
      *
      * @return string The node XML
      */
-    public function xml(int $options = 0): string
+    public function xml($options = 0)
     {
         return $this->toDocument()->xml($options);
     }
@@ -518,7 +502,7 @@ abstract class Node
      *
      * @return string The node value
      */
-    public function text(): string
+    public function text()
     {
         return $this->node->textContent;
     }
@@ -526,20 +510,20 @@ abstract class Node
     /**
      * Set the value of this node.
      *
-     * @param string|integer|float $value The new value of the node
+     * @param string $value The new value of the node
      *
      * @return static
      *
      * @throws InvalidArgumentException if parameter 1 is not a string
      */
-    public function setValue($value): self
+    public function setValue($value)
     {
         if (is_numeric($value)) {
             $value = (string) $value;
         }
 
-        if ( ! is_string($value)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, integer or float, %s given', __METHOD__, (is_object($value) ? get_class($value) : gettype($value))));
+        if ( ! is_string($value) && $value !== null) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, (is_object($value) ? get_class($value) : gettype($value))));
         }
 
         $this->node->nodeValue = $value;
@@ -552,7 +536,7 @@ abstract class Node
      *
      * @return bool
      */
-    public function isElementNode(): bool
+    public function isElementNode()
     {
         return $this->node instanceof DOMElement;
     }
@@ -562,7 +546,7 @@ abstract class Node
      *
      * @return bool
      */
-    public function isTextNode(): bool
+    public function isTextNode()
     {
         return $this->node instanceof DOMText;
     }
@@ -572,7 +556,7 @@ abstract class Node
      *
      * @return bool
      */
-    public function isCommentNode(): bool
+    public function isCommentNode()
     {
         return $this->node instanceof DOMComment;
     }
@@ -582,7 +566,7 @@ abstract class Node
      *
      * @return bool
      */
-    public function isCdataSectionNode(): bool
+    public function isCdataSectionNode()
     {
         return $this->node instanceof DOMCdataSection;
     }
@@ -596,14 +580,14 @@ abstract class Node
      *
      * @throws InvalidArgumentException if parameter 1 is not an instance of DOMNode
      */
-    public function is($node): bool
+    public function is($node)
     {
         if ($node instanceof Node) {
             $node = $node->getNode();
         }
 
         if ( ! $node instanceof DOMNode) {
-            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
+            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($node) ? get_class($node) : gettype($node))));
         }
 
         return $this->node->isSameNode($node);
@@ -635,7 +619,7 @@ abstract class Node
      *
      * @throws InvalidSelectorException if the selector is invalid
      */
-    public function closest(string $selector, bool $strict = false): ?Element
+    public function closest($selector, $strict = false)
     {
         $node = $this;
 
@@ -652,6 +636,8 @@ abstract class Node
 
             $node = $parent;
         }
+
+        return null;
     }
 
     /**
@@ -665,7 +651,7 @@ abstract class Node
      * @throws LogicException if the selector used with non DOMElement node type
      * @throws InvalidSelectorException if the selector is invalid
      */
-    public function previousSibling(?string $selector = null, ?string $nodeType = null): ?Element
+    public function previousSibling($selector = null, $nodeType = null)
     {
         if ($this->node->previousSibling === null) {
             return null;
@@ -679,6 +665,10 @@ abstract class Node
             $nodeType = 'DOMElement';
         }
 
+        if ( ! is_string($nodeType)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be string, %s given', __METHOD__, gettype($nodeType)));
+        }
+
         $allowedTypes = ['DOMElement', 'DOMText', 'DOMComment', 'DOMCdataSection'];
 
         if ( ! in_array($nodeType, $allowedTypes, true)) {
@@ -686,7 +676,7 @@ abstract class Node
         }
 
         if ($selector !== null && $nodeType !== 'DOMElement') {
-            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given.', $nodeType));
+            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given', $nodeType));
         }
 
         $node = $this->node->previousSibling;
@@ -721,7 +711,7 @@ abstract class Node
      * @throws LogicException if the selector used with non DOMElement node type
      * @throws InvalidSelectorException if the selector is invalid
      */
-    public function previousSiblings(?string $selector = null, ?string $nodeType = null): array
+    public function previousSiblings($selector = null, $nodeType = null)
     {
         if ($this->node->previousSibling === null) {
             return [];
@@ -732,6 +722,10 @@ abstract class Node
         }
 
         if ($nodeType !== null) {
+            if ( ! is_string($nodeType)) {
+                throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be string, %s given', __METHOD__, gettype($nodeType)));
+            }
+
             $allowedTypes = ['DOMElement', 'DOMText', 'DOMComment', 'DOMCdataSection'];
 
             if ( ! in_array($nodeType, $allowedTypes, true)) {
@@ -740,7 +734,7 @@ abstract class Node
         }
 
         if ($selector !== null && $nodeType !== 'DOMElement') {
-            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given.', $nodeType));
+            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given', $nodeType));
         }
 
         $result = [];
@@ -793,7 +787,7 @@ abstract class Node
      * @throws LogicException if the selector used with non DOMElement node type
      * @throws InvalidSelectorException if the selector is invalid
      */
-    public function nextSibling(?string $selector = null, ?string $nodeType = null): ?Element
+    public function nextSibling($selector = null, $nodeType = null)
     {
         if ($this->node->nextSibling === null) {
             return null;
@@ -807,6 +801,10 @@ abstract class Node
             $nodeType = 'DOMElement';
         }
 
+        if ( ! is_string($nodeType)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be string, %s given', __METHOD__, gettype($nodeType)));
+        }
+
         $allowedTypes = ['DOMElement', 'DOMText', 'DOMComment', 'DOMCdataSection'];
 
         if ( ! in_array($nodeType, $allowedTypes, true)) {
@@ -814,7 +812,7 @@ abstract class Node
         }
 
         if ($selector !== null && $nodeType !== 'DOMElement') {
-            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given.', $nodeType));
+            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given', $nodeType));
         }
 
         $node = $this->node->nextSibling;
@@ -840,7 +838,7 @@ abstract class Node
 
     /**
      * @param string|null $selector
-     * @param string|null $nodeType
+     * @param string $nodeType
      *
      * @return Element[]
      *
@@ -849,7 +847,7 @@ abstract class Node
      * @throws LogicException if the selector used with non DOMElement node type
      * @throws InvalidSelectorException if the selector is invalid
      */
-    public function nextSiblings(?string $selector = null, ?string $nodeType = null): array
+    public function nextSiblings($selector = null, $nodeType = null)
     {
         if ($this->node->nextSibling === null) {
             return [];
@@ -859,14 +857,20 @@ abstract class Node
             $nodeType = 'DOMElement';
         }
 
-        $allowedTypes = ['DOMElement', 'DOMText', 'DOMComment', 'DOMCdataSection'];
+        if ($nodeType !== null) {
+            if ( ! is_string($nodeType)) {
+                throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be string, %s given', __METHOD__, gettype($nodeType)));
+            }
 
-        if ($nodeType !== null && ! in_array($nodeType, $allowedTypes, true)) {
-            throw new RuntimeException(sprintf('Unknown node type "%s". Allowed types: %s', $nodeType, implode(', ', $allowedTypes)));
+            $allowedTypes = ['DOMElement', 'DOMText', 'DOMComment', 'DOMCdataSection'];
+
+            if ( ! in_array($nodeType, $allowedTypes, true)) {
+                throw new RuntimeException(sprintf('Unknown node type "%s". Allowed types: %s', $nodeType, implode(', ', $allowedTypes)));
+            }
         }
 
         if ($selector !== null && $nodeType !== 'DOMElement') {
-            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given.', $nodeType));
+            throw new LogicException(sprintf('Selector can be used only with DOMElement node type, %s given', $nodeType));
         }
 
         $result = [];
@@ -913,7 +917,7 @@ abstract class Node
      *
      * @return Element|null
      */
-    public function child(int $index): ?Element
+    public function child($index)
     {
         $child = $this->node->childNodes->item($index);
 
@@ -923,7 +927,7 @@ abstract class Node
     /**
      * @return Element|null
      */
-    public function firstChild(): ?Element
+    public function firstChild()
     {
         if ($this->node->firstChild === null) {
             return null;
@@ -935,7 +939,7 @@ abstract class Node
     /**
      * @return Element|null
      */
-    public function lastChild(): ?Element
+    public function lastChild()
     {
         if ($this->node->lastChild === null) {
             return null;
@@ -947,7 +951,7 @@ abstract class Node
     /**
      * @return bool
      */
-    public function hasChildren(): bool
+    public function hasChildren()
     {
         return $this->node->hasChildNodes();
     }
@@ -955,7 +959,7 @@ abstract class Node
     /**
      * @return Element[]
      */
-    public function children(): array
+    public function children()
     {
         $children = [];
 
@@ -973,14 +977,14 @@ abstract class Node
      *
      * @return Element the node that has been removed
      */
-    public function removeChild($childNode): Element
+    public function removeChild($childNode)
     {
         if ($childNode instanceof Node) {
             $childNode = $childNode->getNode();
         }
 
         if ( ! $childNode instanceof DOMNode) {
-            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($childNode) ? get_class($childNode) : gettype($childNode))));
+            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($childNode) ? get_class($childNode) : gettype($childNode))));
         }
 
         $removedNode = $this->node->removeChild($childNode);
@@ -993,7 +997,7 @@ abstract class Node
      *
      * @return Element[] the nodes that has been removed
      */
-    public function removeChildren(): array
+    public function removeChildren()
     {
         // we need to collect child nodes to array
         // because removing nodes from the DOMNodeList on iterating is not working
@@ -1021,10 +1025,10 @@ abstract class Node
      *
      * @throws LogicException if the current node has no parent node
      */
-    public function remove(): Element
+    public function remove()
     {
         if ($this->node->parentNode === null) {
-            throw new LogicException('Can not remove an element without the parent node.');
+            throw new LogicException('Can not remove an element without the parent node');
         }
 
         $removedNode = $this->node->parentNode->removeChild($this->node);
@@ -1042,10 +1046,10 @@ abstract class Node
      *
      * @throws LogicException if the current node has no parent node
      */
-    public function replace($newNode, bool $clone = true): Element
+    public function replace($newNode, $clone = true)
     {
         if ($this->node->parentNode === null) {
-            throw new LogicException('Can not replace an element without the parent node.');
+            throw new LogicException('Can not replace an element without the parent node');
         }
 
         if ($newNode instanceof Node) {
@@ -1053,14 +1057,14 @@ abstract class Node
         }
 
         if ( ! $newNode instanceof DOMNode) {
-            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given.', __METHOD__, __CLASS__, (is_object($newNode) ? get_class($newNode) : gettype($newNode))));
+            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s or DOMNode, %s given', __METHOD__, __CLASS__, (is_object($newNode) ? get_class($newNode) : gettype($newNode))));
         }
 
         if ($clone) {
             $newNode = $newNode->cloneNode(true);
         }
 
-        if ($newNode->ownerDocument === null || ! $this->ownerDocument()->is($newNode->ownerDocument)) {
+        if ($newNode->ownerDocument === null || ! $this->getDocument()->is($newNode->ownerDocument)) {
             $newNode = $this->node->ownerDocument->importNode($newNode, true);
         }
 
@@ -1074,7 +1078,7 @@ abstract class Node
      *
      * @return int
      */
-    public function getLineNo(): int
+    public function getLineNo()
     {
         return $this->node->getLineNo();
     }
@@ -1086,7 +1090,7 @@ abstract class Node
      *
      * @return Element The cloned node
      */
-    public function cloneNode(bool $deep = true): Element
+    public function cloneNode($deep = true)
     {
         return new Element($this->node->cloneNode($deep));
     }
@@ -1098,12 +1102,12 @@ abstract class Node
      *
      * @return static
      */
-    protected function setNode($node): self
+    protected function setNode($node)
     {
         $allowedClasses = ['DOMElement', 'DOMText', 'DOMComment', 'DOMCdataSection', 'DOMDocumentFragment'];
 
         if ( ! is_object($node) || ! in_array(get_class($node), $allowedClasses, true)) {
-            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of DOMElement, DOMText, DOMComment, DOMCdataSection or DOMDocumentFragment, %s given.', __METHOD__, (is_object($node) ? get_class($node) : gettype($node))));
+            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of DOMElement, DOMText, DOMComment, DOMCdataSection or DOMDocumentFragment, %s given', __METHOD__, (is_object($node) ? get_class($node) : gettype($node))));
         }
 
         $this->node = $node;
@@ -1126,7 +1130,7 @@ abstract class Node
      *
      * @return Document|null
      */
-    public function ownerDocument(): ?Document
+    public function getDocument()
     {
         if ($this->node->ownerDocument === null) {
             return null;
@@ -1142,7 +1146,7 @@ abstract class Node
      *
      * @return Document
      */
-    public function toDocument(string $encoding = 'UTF-8'): Document
+    public function toDocument($encoding = 'UTF-8')
     {
         $document = new Document(null, false, $encoding);
 
@@ -1156,8 +1160,26 @@ abstract class Node
      *
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         return $this->html();
+    }
+
+    /**
+     * Searches for a node in the DOM tree for a given XPath expression or CSS selector.
+     *
+     * @param string $expression XPath expression or CSS selector
+     * @param string $type The type of the expression
+     * @param bool $wrapNode Returns array of Element if true, otherwise array of DOMElement
+     *
+     * @return Element[]|DOMElement[]
+     *
+     * @throws InvalidSelectorException
+     *
+     * @deprecated Not longer recommended, use Element::find() instead.
+     */
+    public function __invoke($expression, $type = Query::TYPE_CSS, $wrapNode = true)
+    {
+        return $this->find($expression, $type, $wrapNode);
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace DiDom;
 
 use DiDom\Exceptions\InvalidSelectorException;
@@ -16,7 +14,7 @@ class Query
      * @const string
      */
     const TYPE_XPATH = 'XPATH';
-    const TYPE_CSS = 'CSS';
+    const TYPE_CSS   = 'CSS';
 
     /**
      * @var array
@@ -33,16 +31,24 @@ class Query
      *
      * @throws InvalidSelectorException if the expression is empty
      */
-    public static function compile(string $expression, string $type = self::TYPE_CSS): string
+    public static function compile($expression, $type = self::TYPE_CSS)
     {
+        if ( ! is_string($expression)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($expression)));
+        }
+
+        if ( ! is_string($type)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be string, %s given', __METHOD__, gettype($type)));
+        }
+
         if (strcasecmp($type, self::TYPE_XPATH) !== 0 && strcasecmp($type, self::TYPE_CSS) !== 0) {
-            throw new RuntimeException(sprintf('Unknown expression type "%s".', $type));
+            throw new RuntimeException(sprintf('Unknown expression type "%s"', $type));
         }
 
         $expression = trim($expression);
 
         if ($expression === '') {
-            throw new InvalidSelectorException('The expression must not be empty.');
+            throw new InvalidSelectorException('The expression must not be empty');
         }
 
         if (strcasecmp($type, self::TYPE_XPATH) === 0) {
@@ -66,7 +72,7 @@ class Query
      *
      * @throws InvalidSelectorException
      */
-    public static function cssToXpath(string $selector, string $prefix = '//'): string
+    public static function cssToXpath($selector, $prefix = '//')
     {
         $paths = [];
 
@@ -91,7 +97,7 @@ class Query
      *
      * @throws InvalidSelectorException
      */
-    protected static function parseAndConvertSelector(string $selector, string $prefix = '//'): array
+    protected static function parseAndConvertSelector($selector, $prefix = '//')
     {
         if (substr($selector, 0, 1) === '>') {
             $prefix = '/';
@@ -136,7 +142,7 @@ class Query
      *
      * @throws InvalidSelectorException
      */
-    protected static function parseProperty(string $selector): array
+    protected static function parseProperty($selector)
     {
         $name = '(?P<name>[\w\-]+)';
         $args = '(?:\((?P<args>[^\)]+)?\))?';
@@ -144,7 +150,7 @@ class Query
         $regexp = '/^::' . $name . $args . '/is';
 
         if (preg_match($regexp, $selector, $matches) !== 1) {
-            throw new InvalidSelectorException(sprintf('Invalid property "%s".', $selector));
+            throw new InvalidSelectorException(sprintf('Invalid property "%s"', $selector));
         }
 
         $result = [];
@@ -166,7 +172,7 @@ class Query
      *
      * @throws InvalidSelectorException if the specified property is unknown
      */
-    protected static function convertProperty(string $name, array $parameters = []): string
+    protected static function convertProperty($name, array $parameters = [])
     {
         if ($name === 'text') {
             return 'text()';
@@ -186,7 +192,7 @@ class Query
             return sprintf('@*[%s]', implode(' or ', $attributes));
         }
 
-        throw new InvalidSelectorException(sprintf('Unknown property "%s".', $name));
+        throw new InvalidSelectorException(sprintf('Unknown property "%s"', $name));
     }
 
     /**
@@ -200,7 +206,7 @@ class Query
      *
      * @throws InvalidSelectorException if the specified pseudo-class is unknown
      */
-    protected static function convertPseudo(string $pseudo, string &$tagName, array $parameters = []): string
+    protected static function convertPseudo($pseudo, &$tagName, array $parameters = [])
     {
         switch ($pseudo) {
             case 'first-child':
@@ -220,7 +226,7 @@ class Query
                 }
 
                 if ($parameters[1] !== 'true' && $parameters[1] !== 'false') {
-                    throw new InvalidSelectorException(sprintf('Parameter 2 of "contains" pseudo-class must be equal true or false, "%s" given.', $parameters[1]));
+                    throw new InvalidSelectorException(sprintf('Parameter 2 of "contains" pseudo-class must be equal true or false, "%s" given', $parameters[1]));
                 }
 
                 $caseSensitive = $parameters[1] === 'true';
@@ -230,7 +236,7 @@ class Query
                 }
 
                 if ($parameters[2] !== 'true' && $parameters[2] !== 'false') {
-                    throw new InvalidSelectorException(sprintf('Parameter 3 of "contains" pseudo-class must be equal true or false, "%s" given.', $parameters[2]));
+                    throw new InvalidSelectorException(sprintf('Parameter 3 of "contains" pseudo-class must be equal true or false, "%s" given', $parameters[2]));
                 }
 
                 $fullMatch = $parameters[2] === 'true';
@@ -249,7 +255,7 @@ class Query
                 return 'count(descendant::*) > 0';
         }
 
-        throw new InvalidSelectorException(sprintf('Unknown pseudo-class "%s".', $pseudo));
+        throw new InvalidSelectorException(sprintf('Unknown pseudo-class "%s"', $pseudo));
     }
 
     /**
@@ -260,7 +266,7 @@ class Query
      *
      * @throws InvalidArgumentException if you neither specify tag name nor attributes
      */
-    public static function buildXpath(array $segments, string $prefix = '//'): string
+    public static function buildXpath(array $segments, $prefix = '//')
     {
         $tagName = isset($segments['tag']) ? $segments['tag'] : '*';
 
@@ -298,7 +304,7 @@ class Query
         }
 
         if (count($attributes) === 0 && ! isset($segments['tag'])) {
-            throw new InvalidArgumentException('The array of segments must contain the name of the tag or at least one attribute.');
+            throw new InvalidArgumentException('The array of segments must contain the name of the tag or at least one attribute');
         }
 
         $xpath = $prefix . $tagName;
@@ -312,11 +318,11 @@ class Query
 
     /**
      * @param string $name The name of an attribute
-     * @param string|null $value The value of an attribute
+     * @param string $value The value of an attribute
      *
      * @return string
      */
-    protected static function convertAttribute(string $name, ?string $value): string
+    protected static function convertAttribute($name, $value)
     {
         $isSimpleSelector = ! in_array(substr($name, 0, 1), ['^', '!'], true);
         $isSimpleSelector = $isSimpleSelector && ( ! in_array(substr($name, -1), ['^', '$', '*', '!', '~'], true));
@@ -382,10 +388,10 @@ class Query
      *
      * @throws InvalidSelectorException if the given nth-child expression is empty or invalid
      */
-    protected static function convertNthExpression(string $expression): string
+    protected static function convertNthExpression($expression)
     {
         if ($expression === '') {
-            throw new InvalidSelectorException('nth-child (or nth-last-child) expression must not be empty.');
+            throw new InvalidSelectorException('nth-child (or nth-last-child) expression must not be empty');
         }
 
         if ($expression === 'odd') {
@@ -410,7 +416,7 @@ class Query
             }
         }
 
-        throw new InvalidSelectorException(sprintf('Invalid nth-child expression "%s".', $expression));
+        throw new InvalidSelectorException(sprintf('Invalid nth-child expression "%s"', $expression));
     }
 
     /**
@@ -420,7 +426,7 @@ class Query
      *
      * @return string
      */
-    protected static function convertContains(string $string, bool $caseSensitive = true, bool $fullMatch = false): string
+    protected static function convertContains($string, $caseSensitive = true, $fullMatch = false)
     {
         if ($caseSensitive && $fullMatch) {
             return sprintf('text() = "%s"', $string);
@@ -449,7 +455,7 @@ class Query
      *
      * @throws InvalidSelectorException if the selector is empty or not valid
      */
-    public static function getSegments(string $selector): array
+    public static function getSegments($selector)
     {
         $selector = trim($selector);
 
@@ -484,7 +490,7 @@ class Query
                     list($name, $value) = array_pad(explode('=', $attribute, 2), 2, null);
 
                     if ($name === '') {
-                        throw new InvalidSelectorException(sprintf('Invalid selector "%s": attribute name must not be empty.', $selector));
+                        throw new InvalidSelectorException(sprintf('Invalid selector "%s": attribute name must not be empty', $selector));
                     }
 
                     // equal null if specified only the attribute name
@@ -527,7 +533,7 @@ class Query
         return $result;
     }
 
-    private static function getSelectorRegex(): string
+    private static function getSelectorRegex()
     {
         $tag = '(?P<tag>[\*|\w|\-]+)?';
         $id = '(?:#(?P<id>[\w|\-]+))?';
@@ -544,7 +550,7 @@ class Query
     /**
      * @return array
      */
-    public static function getCompiled(): array
+    public static function getCompiled()
     {
         return static::$compiled;
     }
@@ -554,7 +560,7 @@ class Query
      *
      * @throws InvalidArgumentException if the attributes is not an array
      */
-    public static function setCompiled(array $compiled): void
+    public static function setCompiled(array $compiled)
     {
         static::$compiled = $compiled;
     }
